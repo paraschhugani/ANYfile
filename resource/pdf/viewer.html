@@ -37,6 +37,7 @@ See https://github.com/adobe-type-tools/cmap-resources
   <script src="pdf.js"></script>
   <script src="viewer.js"></script>
   <script src="main.js"></script>
+  <script src="highlight.js"></script>
 </head>
 
 <body tabindex="1">
@@ -263,10 +264,17 @@ See https://github.com/adobe-type-tools/cmap-resources
                 <span data-l10n-id="bookmark_label">Current View</span>
               </a>
 
-              <div class="splitToolbarButton office-theme-toggle-group">
-                <button id="themeAdaptToggle" class="toolbarButton" title="开启主题适配（跟随 VS Code 颜色）" tabindex="35" aria-label="开启主题适配"></button>
+              <div id="highlightToolGroup" class="splitToolbarButton office-highlight-group">
+                <button id="highlightModeToggle" class="toolbarButton toggled" title="Highlight mode on: selecting text highlights it (click to turn off)" tabindex="35" aria-pressed="true" aria-label="Highlight mode"></button>
                 <div class="splitToolbarButtonSeparator"></div>
-                <button id="darkModeToggle" class="toolbarButton" title="切换 PDF 暗色模式 (Ctrl/Cmd+L)" tabindex="36" aria-label="切换 PDF 暗色模式"></button>
+                <button id="highlightColorToggle" class="toolbarButton" title="Highlight color" tabindex="35" aria-haspopup="menu" aria-expanded="false" aria-controls="highlightColorMenu" aria-label="Highlight color"></button>
+                <div id="highlightColorMenu" class="office-highlight-color-menu hidden" role="menu" aria-label="Highlight color"></div>
+              </div>
+
+              <div class="splitToolbarButton office-theme-toggle-group">
+                <button id="themeAdaptToggle" class="toolbarButton" title="Match VS Code theme colors" tabindex="35" aria-label="Match VS Code theme colors"></button>
+                <div class="splitToolbarButtonSeparator"></div>
+                <button id="darkModeToggle" class="toolbarButton" title="Switch PDF to dark mode (Ctrl/Cmd+L)" tabindex="36" aria-label="Switch PDF to dark mode"></button>
               </div>
 
               <div class="verticalToolbarSeparator hiddenSmallView"></div>

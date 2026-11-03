@@ -7,6 +7,7 @@ import { handleImage, isImage } from './handlers/imageHanlder';
 import { handleSvg } from './handlers/svgHandler';
 import { isVirtualUri, readUriText } from './handlers/officeContent';
 import { handleCommonEvent } from './compress/commonHandler';
+import { handlePdfHighlight } from './handlers/pdfHighlightHandler';
 import { TelemetryService } from '@/service/telemetryService';
 import { extensionResource, getExtensionResourceRoots, readExtensionText } from '@/common/extensionResource';
 
@@ -75,6 +76,7 @@ export class OfficeViewerProvider implements vscode.CustomReadonlyEditorProvider
 				route = 'font';
 				break;
 			case '.pdf':
+				handlePdfHighlight(handler, uri);
 				void this.loadPdfViewer(webview);
 				break;
 			case '.epub':

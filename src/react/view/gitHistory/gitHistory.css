@@ -1633,38 +1633,6 @@ body[data-vscode-theme-id="One Dark Modern"] .git-graph:not(.git-graph-light) {
     justify-self: start;
 }
 
-.git-graph-bottom-bar-sponsor {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.git-graph-bottom-bar.has-more .git-graph-bottom-bar-sponsor {
-    grid-column: 2;
-}
-
-.git-graph-bottom-bar .office-sponsor-bar {
-    --sponsor-bar-muted: var(--git-graph-muted);
-    --sponsor-bar-accent: var(--git-graph-accent);
-    position: static;
-    bottom: auto;
-    right: auto;
-    left: auto;
-    z-index: auto;
-    flex-shrink: 0;
-    gap: 6px;
-    padding: 0;
-}
-
-.git-graph-bottom-bar .office-sponsor-bar-logo {
-    width: 22px;
-    height: 22px;
-}
-
-.git-graph-bottom-bar .office-sponsor-bar--center {
-    margin-inline: auto;
-}
-
 @media (max-height: 299px) {
     .git-graph-bottom-bar {
         display: none !important;

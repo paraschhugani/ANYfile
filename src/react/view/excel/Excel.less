@@ -503,33 +503,6 @@ body:has(.excel-app) {
         border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
-    .excel-bottombar-sponsor {
-        display: flex;
-        flex: 0 0 auto;
-        align-items: center;
-        align-self: stretch;
-        padding-left: 8px;
-        padding-right: 8px;
-
-        .office-sponsor-bar,
-        .office-sponsor-bar--right {
-            position: static;
-            right: auto;
-            bottom: auto;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-    }
-
-    // Kept for compatibility; sponsor now lives in bottombar flex layout
-    --excel-footer-reserve: 0px;
-
-    &.excel-viewer--no-sponsor {
-        --excel-footer-reserve: 0px;
-    }
-
     --excel-selection: rgb(33, 186, 69);
     --excel-selection-fill: rgba(33, 186, 69, 0.1);
 
@@ -1231,15 +1204,6 @@ body.office-adaptive {
 
 body.office-dark {
     background-color: var(--vscode-editor-background, #1e1e1e);
-}
-
-@media (max-width: 650px) {
-    .excel-viewer {
-        .excel-bottombar-sponsor,
-        .office-sponsor-bar {
-            display: none !important;
-        }
-    }
 }
 
 // ─── Apple-style UI beautification ────────────────────────────────────────────

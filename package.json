@@ -1,10 +1,10 @@
 {
-	"name": "vscode-office",
-	"displayName": "Office Viewer",
+	"name": "anyfile",
+	"displayName": "ANYfile",
 	"description": "View word, excel, powerpoint files and using WYSIWYG editor for markdown.",
-	"version": "4.2.2",
-	"publisher": "cweijan",
-	"icon": "image/logo.png",
+	"version": "4.2.4",
+	"publisher": "paras",
+	"icon": "image/anyfile-logo.png",
 	"engines": {
 		"vscode": "^1.64.0"
 	},

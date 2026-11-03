@@ -6,7 +6,6 @@ import { useWindowSize } from '../../util/reactUtils';
 import FileItems from './components/FileItems';
 import JarInfoPanel from './components/JarInfoPanel';
 import PasswordModal from './components/PasswordModal';
-import Sponsor from '../components/Sponsor';
 import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
 import ExtractToast, { ExtractToastMessage } from './components/ExtractToast';
@@ -175,7 +174,6 @@ function ZipViewer() {
                             onClickFolder={changeFiles}
                         />
                     </div>
-                    <Sponsor dark={dark} variant="sidebar" />
                 </aside>
                 <main className="zip-content">
                     <FileItems items={tableItems} loaded={loaded} onOpenPath={handleOpenPath} />

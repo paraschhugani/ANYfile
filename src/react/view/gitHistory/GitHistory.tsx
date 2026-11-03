@@ -58,7 +58,6 @@ import type {
 } from './types';
 import './gitHistory.css';
 import '@vscode/codicons/dist/codicon.css';
-import SponsorBar from '../components/SponsorBar';
 
 const ROW_HEIGHT = 28;
 const TABLE_HEADER_HEIGHT = 28;
@@ -78,16 +77,14 @@ function countRealCommits(commits: ReadonlyArray<GitCommit>): number {
 }
 
 function GitHistoryBottomBar({ commitCount = 0 }: { commitCount?: number }) {
+    if (commitCount === 0) {
+        return null;
+    }
     return (
-        <footer className={`git-graph-bottom-bar${commitCount > 0 ? ' has-more' : ''}`}>
-            {commitCount > 0 && (
-                <span className="git-graph-more">
-                    Showing {commitCount} commits
-                </span>
-            )}
-            <div className="git-graph-bottom-bar-sponsor">
-                <SponsorBar placement="center" />
-            </div>
+        <footer className="git-graph-bottom-bar has-more">
+            <span className="git-graph-more">
+                Showing {commitCount} commits
+            </span>
         </footer>
     );
 }

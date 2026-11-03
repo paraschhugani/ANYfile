@@ -22,6 +22,13 @@ export function shouldSkipFileChange(uri: Uri): boolean {
     return !!(lastSaveTime && Date.now() - lastSaveTime < INTERNAL_SAVE_CHANGE_WINDOW_MS);
 }
 
+/** Writes the file as an internal save, so the file watcher's resulting change event is skipped. */
+export async function writeFileAsInternalSave(uri: Uri, content: Uint8Array): Promise<void> {
+    fileSaveTimes[uri.toString()] = Date.now();
+    await workspace.fs.writeFile(uri, content);
+    fileSaveTimes[uri.toString()] = Date.now();
+}
+
 function setDirty(handler: Handler, uri: Uri, dirty: boolean) {
     const panel = handler.panel;
     const fileName = basename(uri.fsPath);
@@ -100,13 +107,6 @@ export function handleCommonEvent(uri: Uri, handler: Handler, options?: { skipOp
             await vscode.commands.executeCommand('vscode.openWith', target, 'cweijan.officeViewer');
         })
         .on('developerTool', () => vscode.commands.executeCommand('workbench.action.toggleDevTools'))
-        .on('sponsorClick', () => { })
-        .on('openSponsor', () => {
-            vscode.commands.executeCommand(
-                'workbench.extensions.action.showExtensionsWithIds',
-                ['cweijan.vscode-database-client2'],
-            );
-        })
         .on('openExternal', (url: string) => {
             if (url) {
                 vscode.env.openExternal(vscode.Uri.parse(url));

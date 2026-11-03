@@ -36,13 +36,3 @@
     border: 2px solid var(--viewer-scrollbar-track);
 }
 
-.office-viewer-themed .office-sponsor {
-    --sponsor-muted: var(--vscode-descriptionForeground, rgba(204, 204, 204, 0.7));
-    --sponsor-accent: var(--vscode-textLink-foreground, #3794ff);
-    --sponsor-border: var(--vscode-editorWidget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.45)));
-    --sponsor-bg: color-mix(
-        in srgb,
-        var(--vscode-sideBar-background, var(--vscode-editorGroupHeader-tabsBackground, #252526)) 96%,
-        transparent
-    );
-}
