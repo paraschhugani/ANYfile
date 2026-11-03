@@ -106,43 +106,6 @@ html:has(.word-viewer) {
     background-color: var(--vscode-toolbar-hoverBackground, rgba(90, 93, 94, 0.31));
 }
 
-.word-sponsor-footer {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 32px;
-    padding: 2px 12px 4px;
-    border-top: 1px solid #e0e0e0;
-    background: #f8f9fa;
-}
-
-.word-sponsor-footer .office-sponsor-bar {
-    position: static;
-    bottom: auto;
-    right: auto;
-    left: auto;
-    z-index: auto;
-    flex-shrink: 0;
-    gap: 6px;
-    padding: 0;
-}
-
-.word-sponsor-footer .office-sponsor-bar-logo {
-    width: 22px;
-    height: 22px;
-}
-
-.word-viewer--vscode-theme .word-sponsor-footer {
-    border-top-color: var(--vscode-panel-border, var(--vscode-editorWidget-border));
-    background: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-sideBar-background, var(--vscode-editor-background)));
-}
-
-.word-viewer--vscode-theme .word-sponsor-footer .office-sponsor-bar {
-    --sponsor-bar-muted: var(--vscode-descriptionForeground);
-    --sponsor-bar-accent: var(--vscode-textLink-foreground);
-}
-
 .word-viewer--vscode-theme .word-readonly-banner {
     color: var(--vscode-editorWarning-foreground);
     background: color-mix(in srgb, var(--vscode-editorWarning-foreground) 14%, var(--vscode-editor-background));

@@ -1,6 +1,6 @@
 # Telemetry setup (Azure Application Insights)
 
-This guide is for **maintainers** who build and publish Office Viewer. End users should read the **Usage data** section in [README.md](../README.md) or [README-CN.md](../README-CN.md).
+This guide is for **maintainers** who build and publish Office Viewer. End users should read the **Usage data** section in [README.md](../README.md).
 
 ## Overview
 

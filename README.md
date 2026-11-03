@@ -1,6 +1,16 @@
-# Office Viewer
+# ANYfile
 
-English | [简体中文](README-CN.md) | [繁體中文](README-TW.md)
+> **I modified this extension to fit my use case.** Thank you to [cweijan/vscode-office](https://github.com/cweijan/vscode-office) (Office Viewer by Weijan Chen, MIT License). This extension is built on their work.
+>
+> What I changed:
+>
+> - **PDF highlighting:** select text in a PDF to highlight it. Highlighting is on by default, and the toolbar has a toggle and five colors. Highlights are saved into the PDF file as standard annotations, so other PDF readers show them too. Click a highlight to remove it, or press Ctrl/Cmd+Z to undo the last one.
+> - **Local-only:** it runs as its own extension (`paras.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
+> - **New name and icon.**
+>
+> To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.4.vsix`.
+
+The rest of this README describes the original Office Viewer features, which all still work.
 
 ## Introduction
 
@@ -61,12 +71,6 @@ Shortcuts: Based on [shortcut.md](shortcut.md), plus:
 - Excel: preview and save `.xlsx`, `.xls`, `.xlsm`, `.csv`, and `.ods` files
 - HTTP: send requests from `.http` and `.rest` files (integrated from [REST Client](https://github.com/Huachao/vscode-restclient) with fixes for local request issues); press `Ctrl+Enter` / `⌘ Enter` to send
 - Java: decompile and view `.class` files
-
-## Sponsor
-
-[![Database Client](https://doc.database-client.com/public/logo.png)](https://marketplace.visualstudio.com/items?itemName=cweijan.vscode-database-client2)
-
-Database Client for Visual Studio Code, supporting the management of **MySQL/MariaDB, PostgreSQL, SQLite, Redis**, and **ElasticSearch**, and works as an **SSH** client to boost your productivity! [Get it now](https://marketplace.visualstudio.com/items?itemName=cweijan.vscode-database-client2).
 
 ## Development Guide
 

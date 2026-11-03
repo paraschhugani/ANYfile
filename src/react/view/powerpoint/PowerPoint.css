@@ -110,13 +110,6 @@ body.office-dark .ppt-thumb img {
     padding: 10px 8px;
 }
 
-.ppt-thumbnails .office-sponsor--sidebar {
-    --sponsor-border: var(--viewer-border);
-    --sponsor-muted: var(--viewer-muted);
-    --sponsor-accent: var(--viewer-accent);
-    --sponsor-bg: color-mix(in srgb, var(--viewer-sider-bg) 96%, transparent);
-}
-
 .ppt-thumb {
     position: relative;
     margin-bottom: 10px;

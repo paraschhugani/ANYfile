@@ -100,12 +100,6 @@ export class MessageRouter {
                 this.onSaveFileHistorySplitLayout(content as { layout: FileHistorySplitLayout })))
             .on('updateConfig', this.wrapHandler((content) =>
                 this.onUpdateConfig(content as { key: string; value: unknown })))
-            .on('openSponsor', this.wrapHandler(() => {
-                void vscode.commands.executeCommand(
-                    'workbench.extensions.action.showExtensionsWithIds',
-                    ['cweijan.vscode-database-client2'],
-                );
-            }))
             .on('openExternal', this.wrapHandler((content) => {
                 const url = typeof content === 'string' ? content : '';
                 if (url) {

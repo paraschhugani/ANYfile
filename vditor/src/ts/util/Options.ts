@@ -68,7 +68,6 @@ export class Options {
                 toolbar: [
                     "outline",
                     "info",
-                    "help",
                 ],
             },
         ],
@@ -95,8 +94,6 @@ export class Options {
         lastLightEditorTheme: "Light",
         lastDarkEditorTheme: "One Dark",
         mermaidTheme: "Auto",
-        onSponsorLogoClick: undefined,
-        onSponsorSiteClick: undefined,
     };
 
     constructor(options: IOptions) {
@@ -271,9 +268,6 @@ export class Options {
         }, {
             icon: getToolbarCodicon("info"),
             name: "info",
-        }, {
-            icon: getToolbarCodicon("help"),
-            name: "help",
         }, {
             icon: getToolbarCodicon("ai-settings"),
             name: "ai-settings",

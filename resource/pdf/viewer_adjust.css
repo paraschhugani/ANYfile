@@ -768,3 +768,200 @@ body.office-adaptive-theme #darkModeToggle.toolbarButton.toggled:hover {
     -webkit-mask-image: var(--secondaryToolbarButton-documentProperties-icon);
     mask-image: var(--secondaryToolbarButton-documentProperties-icon);
 }
+
+/* ---- Text highlights (highlight.js) ---- */
+.office-highlight-group {
+    background: transparent !important;
+    margin-right: 4px;
+}
+
+#highlightToolGroup > .toolbarButton {
+    margin: 0;
+}
+
+#highlightModeToggle.toolbarButton::before,
+#highlightColorToggle.toolbarButton::before {
+    content: none !important;
+    display: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+
+#highlightColorToggle.toolbarButton {
+    width: 24px;
+    padding: 2px 4px 0;
+}
+
+#highlightModeToggle.toolbarButton svg,
+#highlightColorToggle.toolbarButton svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.office-highlight-color-menu {
+    position: absolute !important;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 40000;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    float: none !important;
+    background-color: var(--doorhanger-bg-color) !important;
+    border: 1px solid var(--doorhanger-border-color) !important;
+    border-radius: var(--pdf-segment-radius) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+    box-sizing: border-box;
+}
+
+html[dir="rtl"] .office-highlight-color-menu {
+    right: auto;
+    left: 0;
+}
+
+.office-highlight-swatch {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
+    background-color: var(--office-swatch-color) !important;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.office-highlight-swatch:hover {
+    transform: scale(1.1);
+}
+
+.office-highlight-swatch:focus-visible {
+    outline: 2px solid var(--office-active-fg);
+    outline-offset: 1px;
+}
+
+.office-highlight-swatch.selected {
+    box-shadow: 0 0 0 2px var(--doorhanger-bg-color), 0 0 0 3.5px var(--office-active-fg);
+}
+
+body.office-adaptive-theme .office-highlight-color-menu {
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--vscode-foreground) 12%, transparent);
+}
+
+body.office-adaptive-theme .office-highlight-swatch.selected {
+    box-shadow: 0 0 0 2px var(--vscode-menu-background), 0 0 0 3.5px var(--vscode-focusBorder);
+}
+
+body.office-adaptive-theme .office-highlight-swatch:focus-visible {
+    outline-color: var(--vscode-focusBorder);
+}
+
+/* Session highlights: above the canvas, below the text/annotation layers. Opaque colors with
+   multiply look exactly like the saved /Highlight annotation (/BM /Multiply). */
+.pdfViewer .page .office-hl-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+.pdfViewer .page .office-hl-layer > .office-hl-quad {
+    position: absolute;
+}
+
+/* Dark mode inverts the canvas (F = brightness(0.92) invert hue-rotate). A saved highlight is
+   baked into the canvas and shows as F(page * color) = 1 - 0.92 * hr(page * color); screen-blending
+   inv(color) = invert hue-rotate (no brightness) over F(page) gives 1 - 0.92 * hr(page) * hr(color),
+   identical for grayscale pages. Keeping brightness() here would apply the 0.92 twice. */
+body.office-dark .pdfViewer .page .office-hl-layer {
+    filter: invert(1) hue-rotate(180deg);
+    mix-blend-mode: screen;
+}
+
+.office-hl-popup {
+    position: fixed;
+    z-index: 50000;
+    padding: 4px;
+    background-color: var(--doorhanger-bg-color);
+    color: var(--main-color);
+    border: 1px solid var(--doorhanger-border-color);
+    border-radius: var(--pdf-segment-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+    box-sizing: border-box;
+}
+
+.office-hl-popup-remove {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    margin: 0;
+    padding: 0 10px 0 8px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.office-hl-popup-remove svg {
+    flex-shrink: 0;
+}
+
+.office-hl-popup-remove:hover,
+.office-hl-popup-remove:focus-visible {
+    background-color: var(--office-hover-bg);
+    color: var(--office-hover-fg);
+    outline: none;
+}
+
+body.office-adaptive-theme .office-hl-popup {
+    background-color: var(--vscode-menu-background);
+    color: var(--vscode-menu-foreground, var(--vscode-foreground));
+    border-color: var(--vscode-menu-border, var(--vscode-widget-border));
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--vscode-foreground) 12%, transparent);
+}
+
+body.office-adaptive-theme .office-hl-popup-remove:hover,
+body.office-adaptive-theme .office-hl-popup-remove:focus-visible {
+    background-color: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+}
+
+.office-hl-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 50000;
+    max-width: min(480px, calc(100vw - 32px));
+    padding: 8px 12px;
+    border-radius: var(--pdf-btn-radius);
+    background-color: rgba(32, 32, 32, 0.92);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.office-hl-toast.visible {
+    opacity: 1;
+}
+
+body.office-adaptive-theme .office-hl-toast {
+    background-color: var(--vscode-notifications-background, var(--vscode-editorWidget-background));
+    color: var(--vscode-notifications-foreground, var(--vscode-foreground));
+    border: 1px solid var(--vscode-notifications-border, var(--vscode-widget-border, transparent));
+}

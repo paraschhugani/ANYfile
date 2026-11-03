@@ -5,7 +5,6 @@ import { handler } from '../../util/vscode';
 import { type ImageSource, resolveImageSrc, revokeObjectUrl } from './convertImage';
 import './Image.less';
 import { createBrowseWheelHandler } from './browseWheel';
-import SponsorBar from '../components/SponsorBar';
 
 type WheelMode = 'navigate' | 'zoom';
 
@@ -207,7 +206,6 @@ export default function Image() {
                 slideDuration={0} showIndex={true} showFullscreenButton={false} showPlayButton={false}
                 onSlide={selectImage}
             />
-            <SponsorBar placement="center" />
         </div>
     );
 };

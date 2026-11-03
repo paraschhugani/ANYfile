@@ -550,35 +550,8 @@ body:has(.parquet-app) {
     }
 }
 
-.parquet-viewer__corner-actions {
-    position: fixed;
-    left: 12px;
-    bottom: 8px;
-    z-index: 1000;
-    pointer-events: none;
-
-    > * {
-        pointer-events: auto;
-    }
-
-    .office-sponsor-bar {
-        position: static;
-        padding: 4px 8px;
-        border-radius: var(--pv-radius);
-        background: color-mix(in srgb, var(--pv-bg) 88%, transparent);
-        border: 1px solid var(--pv-border);
-        backdrop-filter: blur(8px);
-        --sponsor-bar-muted: var(--pv-muted);
-        --sponsor-bar-accent: var(--vscode-textLink-foreground, #3794ff);
-    }
-}
-
 @media (max-width: 720px) {
     .parquet-viewer__sider {
         width: 220px;
-    }
-
-    .parquet-viewer__corner-actions .office-sponsor-bar {
-        display: none;
     }
 }

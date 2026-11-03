@@ -63,10 +63,6 @@ body {
     padding: 8px 0;
 }
 
-.psd-sider-bottom {
-    flex-shrink: 0;
-}
-
 .psd-layer-item {
     display: flex;
     align-items: center;

@@ -63,10 +63,6 @@ body {
     padding: 8px 0;
 }
 
-.icns-sider-bottom {
-    flex-shrink: 0;
-}
-
 .icns-size-item {
     display: flex;
     align-items: center;
