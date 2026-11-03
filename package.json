@@ -593,6 +593,17 @@
 		],
 		"configuration": [
 			{
+				"title": "PDF",
+				"order": 2,
+				"properties": {
+					"vscode-office.pdf.rememberPositionInFile": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "Remember the last page you were on inside the PDF file itself, so it follows the file to your other devices (and to anyone you share the file with). It is stored as a custom document property, `ANYfileLastView`, which other PDF readers do not act on but may show in Document Properties. The file is updated when you close or switch away from it, and only if the page changed; read-only, encrypted and signed PDFs are never changed. When off, the position is only remembered locally (last 20 PDFs)."
+					}
+				}
+			},
+			{
 				"title": "Git History",
 				"order": 98,
 				"properties": {
