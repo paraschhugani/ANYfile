@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="image/anyfile-logo.png" alt="ANYfile logo" width="160">
+</p>
+
 # ANYfile
 
 > **I modified this extension to fit my use case.** Thank you to [cweijan/vscode-office](https://github.com/cweijan/vscode-office) (Office Viewer by Weijan Chen, MIT License). This extension is built on their work.

@@ -38,13 +38,12 @@
 		"Other"
 	],
 	"bugs": {
-		"url": "https://github.com/cweijan/vscode-office/issues",
-		"email": "cweijan@163.com"
+		"url": "https://github.com/paraschhugani/ANYfile/issues"
 	},
-	"homepage": "https://github.com/cweijan/vscode-office/blob/master/README.md",
+	"homepage": "https://github.com/paraschhugani/ANYfile#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/cweijan/vscode-office.git"
+		"url": "https://github.com/paraschhugani/ANYfile.git"
 	},
 	"activationEvents": [
 		"onStartupFinished"
