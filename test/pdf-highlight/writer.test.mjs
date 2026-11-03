@@ -394,7 +394,7 @@ test('encrypted PDF is refused', async (t) => {
     }
 });
 
-async function makeSignedPdf({ withValue, inherited }) {
+async function makeSignedPdf({ withValue, inherited, sigFlags = withValue ? 3 : 1 }) {
     return makeTextPdf({
         mutate: doc => {
             const ctx = doc.context;
@@ -421,7 +421,7 @@ async function makeSignedPdf({ withValue, inherited }) {
                 fieldRef = ctx.register(widget);
                 doc.getPage(0).node.set(PDFName.of('Annots'), ctx.obj([fieldRef]));
             }
-            doc.catalog.set(PDFName.of('AcroForm'), ctx.obj({ Fields: [fieldRef], SigFlags: 3 }));
+            doc.catalog.set(PDFName.of('AcroForm'), ctx.obj({ Fields: [fieldRef], SigFlags: sigFlags }));
         },
     });
 }
@@ -438,7 +438,11 @@ test('digitally signed PDF is detected; save needs allowSigned', async () => {
     assert.equal((await writer.PdfHighlightDocument.load(inheritedSigned)).signed, true, 'FT inherited from parent field');
 
     const emptySigField = await makeSignedPdf({ withValue: false, inherited: false });
-    assert.equal((await writer.PdfHighlightDocument.load(emptySigField)).signed, false, 'unsigned signature field');
+    assert.equal((await writer.PdfHighlightDocument.load(emptySigField)).signed, false, 'unsigned signature field (SigFlags 1)');
+    const appendOnly = await makeSignedPdf({ withValue: false, inherited: false, sigFlags: 2 });
+    assert.equal((await writer.PdfHighlightDocument.load(appendOnly)).signed, true, 'AppendOnly flag');
+    const readerExtended = await makeTextPdf({ mutate: doc => doc.catalog.set(PDFName.of('Perms'), doc.context.obj({ UR3: doc.context.obj({ Type: 'Sig' }) })) });
+    assert.equal((await writer.PdfHighlightDocument.load(readerExtended)).signed, true, 'Reader-extended (/Perms /UR3)');
     assert.equal((await writer.PdfHighlightDocument.load(original)).signed, false);
 });
 

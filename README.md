@@ -11,6 +11,7 @@ Made by Paras Chhugani · X: [@paras_chhugani](https://x.com/paras_chhugani)
 > What I changed:
 >
 > - **PDF highlighting:** select text in a PDF to highlight it. Highlighting is on by default, and the toolbar has a toggle and five colors. Highlights are saved into the PDF file as standard annotations, so other PDF readers show them too. Click a highlight to remove it, or press Ctrl/Cmd+Z to undo the last one.
+> - **Remembers your page inside the PDF:** the last page you were on is saved in the file itself (as a custom document property), so it follows the PDF to your other devices with no limit on how many files are remembered. Turn it off with the `vscode-office.pdf.rememberPositionInFile` setting.
 > - **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
 > - **New name and icon.**
 >

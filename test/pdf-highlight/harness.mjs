@@ -176,12 +176,14 @@ function mockVsCodeApiScript(initialStorage) {
 // Options:
 //   pdfBytes       Uint8Array sent with 'open' on 'init' (default handler)
 //   config         content of 'pdfHighlightConfig' sent after 'open'; null => never sent
+//   viewConfig     content of 'pdfViewConfig' sent before 'open'; null => never sent
 //   onMessage      async (message, viewer) => boolean; return true to suppress the default handling
 //   localStorage   { key: value | null } seeded before the first load (null removes the key)
 //   viewport       puppeteer viewport (default 1200x900, deviceScaleFactor 1)
 export async function openViewer({
     pdfBytes,
     config = { writable: true },
+    viewConfig = { rememberPosition: true },
     onMessage,
     localStorage: initialStorage = {},
     viewport = { width: 1200, height: 900, deviceScaleFactor: 1 },
@@ -276,6 +278,9 @@ export async function openViewer({
             // main.js opens the document as soon as 'open' arrives; the real extension host
             // round trip is slow enough for PDF.js to finish initializing, this one is not.
             await viewer.waitForInitialized();
+            if (viewConfig) {
+                await viewer.post('pdfViewConfig', viewConfig);
+            }
             if (pdfBytes) {
                 await viewer.post('open', { buffer: pdfBytes });
             }

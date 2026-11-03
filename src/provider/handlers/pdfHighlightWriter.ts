@@ -40,7 +40,24 @@ export interface PdfHighlightRemoveOp {
     fingerprint?: string | null;
 }
 
-export type PdfHighlightOp = PdfHighlightAddOp | PdfHighlightRemoveOp;
+/** Reading position, in PDF user space of the page (as PDF.js reports it in `updateviewarea`). */
+export interface PdfViewState {
+    /** 1-based page number */
+    page: number;
+    left?: number | null;
+    top?: number | null;
+    /** When the position was saved (ms since epoch) */
+    t?: number | null;
+}
+
+/** Stores the reading position in the PDF itself (document info entry {@link PDF_VIEW_STATE_KEY}). */
+export interface PdfViewStateOp {
+    type: 'view';
+    state: PdfViewState;
+    fingerprint?: string | null;
+}
+
+export type PdfHighlightOp = PdfHighlightAddOp | PdfHighlightRemoveOp | PdfViewStateOp;
 
 export interface PdfHighlightOpResult {
     ok: boolean;
@@ -61,10 +78,16 @@ export class PdfHighlightError extends Error {
 }
 
 export const PDF_HIGHLIGHT_ID_PREFIX = 'vso-hl-';
+/** Custom document info key holding the reading position as JSON { v, page, left?, top? }; other readers ignore it. */
+export const PDF_VIEW_STATE_KEY = 'ANYfileLastView';
 const DEFAULT_COLOR = [1, 1, 0];
 const RECT_PADDING = 1;
 const MAX_QUAD_POINTS = 8 * 10000;
 const MAX_COORDINATE = 1e6;
+/** Year ~5138 in ms: rejects garbage while allowing any real clock */
+const MAX_TIMESTAMP = 1e14;
+/** Where to look for trailer dictionaries pdf-lib may have missed (start: linearized first-page section; end: last trailer) */
+const TRAILER_SCAN_BYTES = 1024 * 1024;
 const ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/;
 const FINGERPRINT_PATTERN = /^[0-9a-f]{32}$/i;
 /** PDF.js hashes the first 1024 bytes when the trailer has no usable /ID (see `get fingerprints()` in pdf.worker.js) */
@@ -261,6 +284,7 @@ export class PdfHighlightDocument {
         if (doc.isEncrypted) {
             throw new PdfHighlightError('encrypted', 'This PDF is encrypted, so highlights cannot be saved into it.');
         }
+        recoverTrailerEntries(lib, doc, bytes);
         return new PdfHighlightDocument(lib, doc, bytes, detectSignature(lib, doc));
     }
 
@@ -278,6 +302,9 @@ export class PdfHighlightDocument {
                 if (op?.type === 'remove') {
                     return this.remove(op);
                 }
+                if (op?.type === 'view') {
+                    return this.setViewState(op.state);
+                }
                 return { ok: false, changed: false, error: 'Unknown highlight operation.' };
             } catch (error) {
                 return { ok: false, changed: false, error: error instanceof Error ? error.message : String(error) };
@@ -285,15 +312,23 @@ export class PdfHighlightDocument {
         });
     }
 
-    /** Serializes the document. Writes /ID [<fp> <fp>] when the file has no /ID so PDF.js keeps the same fingerprint. */
+    /**
+     * Serializes the document. Writes /ID [<fp> <fp>] when the file has no usable /ID so PDF.js keeps
+     * the same fingerprint (else it hashes the first bytes, which change with every save).
+     */
     async save(options: PdfHighlightSaveOptions = {}): Promise<Uint8Array> {
         const { lib, doc } = this;
         const context = doc.context;
-        if (!context.trailerInfo.ID) {
+        if (!hasUsableId(lib, context.lookup(context.trailerInfo.ID))) {
             const fingerprint = normalizeFingerprint(options.fingerprint) ?? computeFallbackFingerprint(this.originalBytes);
             if (fingerprint) {
                 context.trailerInfo.ID = context.obj([lib.PDFHexString.of(fingerprint), lib.PDFHexString.of(fingerprint)]);
             }
+        }
+        // pdf-lib always writes a %PDF-1.7 header: keep newer versions (PDF 2.0) through the catalog /Version.
+        const version = this.pdfVersion();
+        if (version > 1.7) {
+            doc.catalog.set(lib.PDFName.of('Version'), lib.PDFName.of(version.toFixed(1)));
         }
         return doc.save({
             // Cross-reference streams need PDF 1.5; keep classic xref tables for older files.
@@ -422,6 +457,45 @@ export class PdfHighlightDocument {
         return this.removeFound(found, true);
     }
 
+    private setViewState(state: PdfViewState | undefined): PdfHighlightOpResult {
+        const { lib } = this;
+        const page = state?.page;
+        if (typeof page !== 'number' || !Number.isInteger(page) || page < 1 || page > this.doc.getPageCount()) {
+            return { ok: false, changed: false, error: 'Invalid page for the reading position.' };
+        }
+        const value: Record<string, number> = { v: 1, page };
+        for (const key of ['left', 'top'] as const) {
+            const coordinate = state[key];
+            if (typeof coordinate === 'number' && Number.isFinite(coordinate) && Math.abs(coordinate) <= MAX_COORDINATE) {
+                value[key] = Math.round(coordinate);
+            }
+        }
+        if (typeof state.t === 'number' && Number.isFinite(state.t) && state.t > 0 && state.t < MAX_TIMESTAMP) {
+            value.t = Math.round(state.t);
+        }
+        // Only digits, keys and punctuation without parentheses or backslashes: safe as a literal string.
+        const json = JSON.stringify(value);
+        const info = this.getInfoDict();
+        const key = lib.PDFName.of(PDF_VIEW_STATE_KEY);
+        if (readName(lib, info.lookup(key)) === json) {
+            return { ok: true, changed: false };
+        }
+        info.set(key, lib.PDFString.of(json));
+        return { ok: true, changed: true };
+    }
+
+    private getInfoDict(): PDFDict {
+        const { lib, doc } = this;
+        const context = doc.context;
+        const existing = context.lookup(context.trailerInfo.Info);
+        if (existing instanceof lib.PDFDict) {
+            return existing;
+        }
+        const info = context.obj({});
+        context.trailerInfo.Info = context.register(info);
+        return info;
+    }
+
     private removeFound(found: FoundAnnot, byRef: boolean): PdfHighlightOpResult {
         const { lib, doc } = this;
         const context = doc.context;
@@ -512,12 +586,79 @@ function readName(lib: PdfLib, value: PDFObject | undefined): string | undefined
     return undefined;
 }
 
-/** True when the AcroForm has a signature field (/FT /Sig, possibly inherited) with a value (/V). */
+/** Same rule as PDF.js's fingerprint: /ID[0] must be a non-empty string other than 16 zero bytes. */
+function hasUsableId(lib: PdfLib, id: PDFObject | undefined): boolean {
+    if (!(id instanceof lib.PDFArray) || id.size() === 0) {
+        return false;
+    }
+    const first = id.lookup(0);
+    if (!(first instanceof lib.PDFHexString || first instanceof lib.PDFString)) {
+        return false;
+    }
+    const bytes = first.asBytes();
+    return bytes.length > 0 && !(bytes.length === 16 && bytes.every(byte => byte === 0));
+}
+
+function latin1(bytes: Uint8Array): string {
+    let text = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+        text += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    }
+    return text;
+}
+
+/**
+ * pdf-lib takes /Info and /ID only from the last trailer it parses. In linearized files laid out like
+ * qpdf writes them, that last cross-reference section carries only /Size and the entries live in the
+ * first-page section, so saving would drop the document info (title, author...) and the /ID.
+ * Recover them from the raw trailer / cross-reference stream dictionaries.
+ */
+function recoverTrailerEntries(lib: PdfLib, doc: PDFDocument, bytes: Uint8Array) {
+    const trailer = doc.context.trailerInfo;
+    if (trailer.Info && trailer.ID) {
+        return;
+    }
+    const text = bytes.length <= TRAILER_SCAN_BYTES * 2
+        ? latin1(bytes)
+        : latin1(bytes.subarray(0, TRAILER_SCAN_BYTES)) + '\n' + latin1(bytes.subarray(bytes.length - TRAILER_SCAN_BYTES));
+    if (!trailer.Info) {
+        // The last reference wins (newest incremental update); it must resolve to a dictionary.
+        for (const match of [...text.matchAll(/\/Info\s+(\d+)\s+(\d+)\s+R/g)].reverse()) {
+            const ref = lib.PDFRef.of(Number(match[1]), Number(match[2]));
+            if (doc.context.lookup(ref) instanceof lib.PDFDict) {
+                trailer.Info = ref;
+                break;
+            }
+        }
+    }
+    if (!trailer.ID) {
+        const match = [...text.matchAll(/\/ID\s*\[\s*<([0-9A-Fa-f]*)>\s*<([0-9A-Fa-f]*)>\s*\]/g)].pop();
+        if (match) {
+            trailer.ID = doc.context.obj([lib.PDFHexString.of(match[1]), lib.PDFHexString.of(match[2])]);
+        }
+    }
+}
+
+/**
+ * True when rewriting the file would break a signature: a signature field (/FT /Sig, possibly inherited)
+ * with a value (/V), the AppendOnly signature flag, or a usage-rights / certification signature in
+ * /Perms (Reader-extended PDFs lose their extended features when rewritten).
+ */
 function detectSignature(lib: PdfLib, doc: PDFDocument): boolean {
     try {
+        const perms = doc.catalog.lookup(lib.PDFName.of('Perms'));
+        if (perms instanceof lib.PDFDict && ['UR', 'UR3', 'DocMDP'].some(key => perms.has(lib.PDFName.of(key)))) {
+            return true;
+        }
         const acroForm = doc.catalog.lookup(lib.PDFName.of('AcroForm'));
         if (!(acroForm instanceof lib.PDFDict)) {
             return false;
+        }
+        // SigFlags bit 2 (AppendOnly): signatures exist that a non-incremental save invalidates.
+        // Bit 1 alone only says a (possibly empty) signature field exists.
+        const sigFlags = acroForm.lookup(lib.PDFName.of('SigFlags'));
+        if (sigFlags instanceof lib.PDFNumber && (sigFlags.asNumber() & 2) !== 0) {
+            return true;
         }
         const FT = lib.PDFName.of('FT');
         const V = lib.PDFName.of('V');
