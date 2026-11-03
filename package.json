@@ -3,7 +3,11 @@
 	"displayName": "ANYfile",
 	"description": "View word, excel, powerpoint files and using WYSIWYG editor for markdown.",
 	"version": "4.2.4",
-	"publisher": "paras",
+	"publisher": "paras-chhugani",
+	"author": {
+		"name": "Paras Chhugani",
+		"url": "https://x.com/paras_chhugani"
+	},
 	"icon": "image/anyfile-logo.png",
 	"engines": {
 		"vscode": "^1.64.0"
