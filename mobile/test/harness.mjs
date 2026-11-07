@@ -165,7 +165,8 @@ export async function stopHarness() {
     await server?.close();
 }
 
-export async function openApp(fake, { path = 'index.html', storage = {}, dark = false } = {}) {
+/** `beforeLoad`: a script run in every page before its own scripts (e.g. to change what the bridge sets up). */
+export async function openApp(fake, { path = 'index.html', storage = {}, dark = false, beforeLoad } = {}) {
     const context = await browser.createBrowserContext();
     const page = await context.newPage();
     await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -189,6 +190,9 @@ export async function openApp(fake, { path = 'index.html', storage = {}, dark = 
             }
         }
     }, storage);
+    if (beforeLoad) {
+        await page.evaluateOnNewDocument(beforeLoad);
+    }
     await page.goto(`${server.origin}/${path}`, { waitUntil: 'load' });
     return { page, errors, close: () => context.close() };
 }

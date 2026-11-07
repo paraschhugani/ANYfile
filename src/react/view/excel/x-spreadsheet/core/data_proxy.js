@@ -6,7 +6,7 @@ import History from './history';
 import Clipboard from './clipboard';
 import { formatTsvRows, parseTsvRows } from './clipboard_text';
 import { formatHtmlClipboard, parseHtmlClipboard } from './clipboard_html';
-import AutoFilter from './auto_filter';
+import AutoFilter, { autofilterRangeFor } from './auto_filter';
 import { Merges } from './merge';
 import helper from './helper';
 import { MIN_VIEW_COLS, MIN_VIEW_ROWS } from '../config';
@@ -1180,7 +1180,8 @@ export default class DataProxy {
         this.sortedRowMap = new Map();
         this.unsortedRowMap = new Map();
       } else {
-        autoFilter.ref = selector.range.toString();
+        // Like Excel: a header row (or one header cell) selected covers the data below it.
+        autoFilter.ref = autofilterRangeFor(selector.range, (ri, ci) => this.rows.getCell(ri, ci)).toString();
       }
     });
   }

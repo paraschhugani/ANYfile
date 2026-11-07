@@ -19,7 +19,7 @@ What I changed:
 - **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
 - **New name and icon.**
 
-To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.4.vsix`.
+To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.6.vsix`.
 
 ## iPhone and iPad app
 
