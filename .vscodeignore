@@ -25,6 +25,7 @@ yarn.lock
 pnpm-lock.yaml
 pnpm-workspace.yaml
 !package.nls*.json
-ANYfile VS Code Preview Icon.png
 
 mobile/**
+image/anyfile-icon.png
+image/ios/**
