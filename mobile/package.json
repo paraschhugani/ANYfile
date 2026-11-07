@@ -9,7 +9,7 @@
     "sync": "node build.mjs && cap sync ios",
     "ios": "node build.mjs && cap run ios",
     "open": "cap open ios",
-    "test": "node build.mjs && node --test test/app.test.mjs test/formats.test.mjs",
+    "test": "node build.mjs && node --test test/*.test.mjs",
     "typecheck": "../node_modules/.bin/tsc -p tsconfig.json"
   },
   "dependencies": {

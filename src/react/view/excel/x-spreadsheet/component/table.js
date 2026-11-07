@@ -102,7 +102,7 @@ export function renderCell(draw, data, rindex, cindex, yoffset = 0) {
       align: style.align,
       valign: style.valign,
       font,
-      color: hyperlink ? '#0563c1' : resolveExcelCellColor(style.color),
+      color: hyperlink ? '#0563c1' : resolveExcelCellColor(style.color, style.bgcolor),
       strike: style.strike,
       underline: style.underline || !!hyperlink,
     };

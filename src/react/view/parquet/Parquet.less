@@ -555,3 +555,203 @@ body:has(.parquet-app) {
         width: 220px;
     }
 }
+
+/* ANYfile app (iPhone/iPad, view only): body.anyfile-app never exists in VS Code. The schema is a
+   collapsible summary in the toolbar, the table gets the full width and the viewer fits #root. */
+body.anyfile-app {
+    .parquet-app {
+        height: 100%;
+    }
+
+    .parquet-viewer {
+        box-sizing: border-box;
+        height: 100%;
+        min-height: 0;
+        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* The app's theme (theme.css) follows the system appearance but has no tab header, button or warning
+       colors, whose dark fallbacks would show in light mode. */
+    .parquet-viewer:not(.parquet-viewer--light) {
+        --pv-bg: var(--vscode-input-background, var(--vscode-editor-background));
+        --pv-header-bg: color-mix(in srgb, var(--pv-fg) 6%, var(--pv-bg));
+        --pv-sider-bg: var(--pv-header-bg);
+        --pv-accent: var(--anyfile-accent, #007aff);
+        --pv-scrollbar-track: transparent;
+    }
+
+    .parquet-viewer__toolbar {
+        gap: 8px;
+        padding: 6px 10px 6px 8px;
+    }
+
+    .parquet-viewer__toolbar-left {
+        flex: 1;
+        gap: 8px;
+    }
+
+    .parquet-viewer__schema-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--pv-border);
+        border-radius: var(--pv-radius);
+        background: var(--pv-bg);
+        color: var(--pv-fg);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+
+        &[aria-expanded='true'] {
+            background: var(--pv-hover);
+        }
+
+        .codicon {
+            flex-shrink: 0;
+        }
+    }
+
+    .parquet-viewer__schema-toggle-label {
+        flex-shrink: 0;
+        font-weight: 600;
+    }
+
+    .parquet-viewer__schema-toggle-count {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--pv-muted);
+    }
+
+    .parquet-viewer__view-only {
+        flex-shrink: 0;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--pv-type-fg);
+        background: var(--pv-type-bg);
+    }
+
+    .parquet-theme-toggle {
+        width: 36px;
+        height: 36px;
+    }
+
+    .parquet-viewer__schema-panel {
+        flex-shrink: 0;
+        max-height: 45%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-bottom: 1px solid var(--pv-border);
+        background: var(--pv-sider-bg);
+
+        .parquet-viewer__meta {
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            padding: 10px;
+        }
+
+        .parquet-viewer__stat {
+            padding: 6px 10px;
+        }
+
+        .parquet-viewer__stat--wide {
+            grid-column: auto;
+        }
+
+        .parquet-viewer__list {
+            flex: none;
+            overflow: visible;
+        }
+
+        .parquet-viewer__list-item {
+            padding: 9px 10px;
+            font-size: 13px;
+        }
+
+        .parquet-viewer__list-type {
+            max-width: 50%;
+            font-size: 11px;
+        }
+    }
+
+    /* Header and rows scroll together sideways; the rows fill the height between toolbar and pager. */
+    .parquet-viewer__table-wrap {
+        .ant-table,
+        .ant-table-container,
+        .ant-table-header,
+        .ant-table-thead > tr > th {
+            border-radius: 0 !important;
+        }
+
+        .ant-table-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ant-table-header {
+            flex-shrink: 0;
+        }
+
+        .ant-table-body {
+            flex: 1;
+            min-height: 0;
+            max-height: none !important;
+            overscroll-behavior: contain;
+        }
+
+        /* The header is a separate table: antd sizes the columns to the titles through a hidden row in the
+           body, measured here in the header's style (up to 200px); a longer title wraps instead of widening
+           the header out of line with the rows. */
+        .ant-table-measure-cell {
+            padding-inline: 10px !important;
+        }
+
+        .ant-table-measure-cell-content {
+            max-width: 200px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+
+        .ant-table-thead > tr > th {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .ant-table-tbody > tr > td {
+            padding: 7px 10px !important;
+            font-size: 13px;
+        }
+    }
+
+    .parquet-viewer__cell {
+        max-width: 240px;
+    }
+
+    .parquet-viewer__footer {
+        padding: 6px 10px max(6px, env(safe-area-inset-bottom));
+    }
+
+    .parquet-viewer__footer-total,
+    .parquet-viewer__pager-info {
+        font-size: 13px;
+    }
+
+    .parquet-viewer__pager-info {
+        min-width: 64px;
+    }
+
+    .parquet-viewer__pager-btn {
+        width: 40px;
+        height: 36px;
+    }
+}

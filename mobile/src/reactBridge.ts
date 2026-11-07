@@ -33,6 +33,14 @@ document.getElementById('office-configs')?.setAttribute('data-config', JSON.stri
 /* ------------------------------------------------------------- the bridge */
 
 const hostListeners = new Map<string, Listener[]>();
+
+function readStorage(key: string): string | null {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+}
 const stateKey = `anyfile.viewState.${route}`;
 
 const vscodeApi = {
@@ -41,11 +49,18 @@ const vscodeApi = {
         setTimeout(() => hostListeners.get(message?.type ?? '')?.forEach(listener => listener(message.content)), 0);
     },
     getState() {
+        let state: Record<string, unknown> | undefined;
         try {
-            return JSON.parse(localStorage.getItem(stateKey) ?? 'null') ?? undefined;
+            state = JSON.parse(localStorage.getItem(stateKey) ?? 'null') ?? undefined;
         } catch {
-            return undefined;
+            state = undefined;
         }
+        // Viewers' own dark toggle (loadDarkMode in src/react/util/vscode.ts): until the reader picks
+        // light or dark, follow the system appearance.
+        if (state?.darkMode === undefined && readStorage('office-dark-mode') === null) {
+            state = { ...state, darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches };
+        }
+        return state;
     },
     setState(state: unknown) {
         try {

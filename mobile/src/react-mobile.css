@@ -58,14 +58,21 @@ body.anyfile-app {
   margin-right: 72px;
 }
 
-/* The viewer fills the rest of the screen. */
+/* The viewer fills the rest of the screen. (height: auto overrides viewers' own `#root { height: 100% }`,
+   which would push #root past the bottom of the screen.) */
 body.anyfile-app #root {
   position: fixed;
   top: calc(env(safe-area-inset-top) + var(--anyfile-bar-height));
   right: 0;
   bottom: 0;
   left: 0;
+  height: auto;
   overflow: hidden;
+}
+
+/* antd's fullscreen spinner keeps catching taps while it fades out (~200ms after loading). */
+body.anyfile-app .ant-spin-fullscreen:not(.ant-spin-fullscreen-show) {
+  pointer-events: none;
 }
 
 #anyfileError {

@@ -264,3 +264,198 @@ body.office-dark .ppt-thumb img {
 .ppt-viewer .color-mode-toggle:active {
     transform: scale(0.93);
 }
+
+/* ANYfile app (iPhone/iPad): the slide fits the screen, a bottom bar holds the controls and the
+   thumbnails open in a drawer. body.anyfile-app never exists in VS Code. */
+
+body.anyfile-app #root {
+    height: auto;
+    min-height: 0;
+}
+
+/* The loading spinner fades out: taps go through to the slide right away. */
+body.anyfile-app .ant-spin-fullscreen:not(.ant-spin-fullscreen-show) {
+    pointer-events: none;
+}
+
+body.anyfile-app .ppt-viewer {
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.anyfile-app .ppt-viewer.office-viewer-themed {
+    --viewer-accent: var(--anyfile-accent, #007aff);
+    --viewer-active-fg: var(--anyfile-accent, #007aff);
+    --viewer-toolbar-bg: #f9f9fb;
+    --ppt-bar-height: 50px;
+}
+
+/* The toggle's dark look does not depend on the system appearance (the app's theme variables do). */
+body.anyfile-app.office-dark {
+    background-color: #000000 !important;
+}
+
+body.anyfile-app.office-dark .ppt-viewer.office-viewer-themed {
+    --viewer-bg: #000000;
+    --viewer-fg: #f2f2f7;
+    --viewer-muted: #98989f;
+    --viewer-border: rgba(84, 84, 88, 0.6);
+    --viewer-sider-bg: #1c1c1e;
+    --viewer-header-bg: #1c1c1e;
+    --viewer-hover: rgba(120, 120, 128, 0.24);
+    --viewer-active-bg: rgba(10, 132, 255, 0.24);
+    --viewer-active-fg: #0a84ff;
+    --viewer-accent: #0a84ff;
+    --viewer-placeholder: #2c2c2e;
+    --viewer-toolbar-bg: #1c1c1e;
+    --viewer-scrollbar-track: #1c1c1e;
+    --viewer-scrollbar-thumb: rgba(255, 255, 255, 0.25);
+}
+
+body.anyfile-app.office-dark .ppt-thumb,
+body.anyfile-app.office-dark .ppt-thumb img {
+    background: #2c2c2e;
+}
+
+body.anyfile-app .ppt-main-canvas {
+    bottom: calc(var(--ppt-bar-height) + env(safe-area-inset-bottom));
+    padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    touch-action: none;
+}
+
+body.anyfile-app #ppt-canvas {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+body.anyfile-app .ppt-mobile-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: var(--ppt-bar-height);
+    padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+    border-top: 0.5px solid var(--viewer-border);
+    background: var(--viewer-toolbar-bg);
+}
+
+body.anyfile-app .ppt-bar-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+body.anyfile-app .ppt-bar-button,
+body.anyfile-app .ppt-viewer .color-mode-toggle,
+body.anyfile-app .ppt-viewer .color-mode-toggle:hover {
+    position: static;
+    z-index: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    color: var(--viewer-accent);
+    font-size: 19px;
+    cursor: pointer;
+}
+
+body.anyfile-app .ppt-bar-slides {
+    justify-self: start;
+}
+
+body.anyfile-app .ppt-viewer .color-mode-toggle {
+    justify-self: end;
+}
+
+body.anyfile-app .ppt-bar-button:active,
+body.anyfile-app .ppt-viewer .color-mode-toggle:active {
+    background: var(--viewer-hover);
+    transform: none;
+}
+
+body.anyfile-app .ppt-bar-button:disabled {
+    color: var(--viewer-muted);
+    opacity: 0.4;
+    background: none;
+    cursor: default;
+}
+
+body.anyfile-app .ppt-bar-counter {
+    min-width: 72px;
+    color: var(--viewer-fg);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+}
+
+body.anyfile-app .ppt-drawer-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+body.anyfile-app .ppt-drawer-scrim.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.anyfile-app .ppt-drawer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 11;
+    width: min(272px, 80%);
+    padding-left: env(safe-area-inset-left);
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+}
+
+body.anyfile-app .ppt-drawer.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.25s ease;
+}
+
+body.anyfile-app .ppt-drawer .ppt-thumbnails-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 0 16px;
+    height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--viewer-fg);
+}
+
+body.anyfile-app .ppt-drawer .ppt-thumbnails-list {
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    touch-action: pan-y;
+}
+
+body.anyfile-app .ppt-thumb:not(.is-active):hover {
+    border-color: transparent;
+}
+
+body.anyfile-app .ppt-thumb img {
+    aspect-ratio: auto;
+}

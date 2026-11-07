@@ -842,3 +842,117 @@ body,
 .epub-viewer .hidden {
     display: none !important;
 }
+/* ANYfile app (iPhone/iPad): the viewer fills #root, below the app's bar; touch replaces the arrows. */
+body.anyfile-app.anyfile-route-epub #root {
+    height: auto;
+    min-height: 0;
+}
+
+body.anyfile-app .epub-viewer {
+    position: absolute;
+    --epub-muted: color-mix(in srgb, currentColor 62%, transparent);
+    --epub-nav-color: color-mix(in srgb, currentColor 38%, transparent);
+}
+
+body.anyfile-app .epub-viewer .error {
+    position: absolute;
+    background: var(--vscode-editor-background);
+    color: var(--vscode-foreground);
+}
+
+body.anyfile-app .epub-viewer .epub-loading {
+    background: transparent;
+}
+
+body.anyfile-app .epub-viewer .epub-reader {
+    padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+
+body.anyfile-app .epub-viewer .epub-bar-bottom {
+    box-sizing: content-box;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Keep the arrows' space while the book loads: the pages are laid out for the reader's final width. */
+body.anyfile-app .epub-viewer .epub-nav.hidden {
+    display: inline-flex !important;
+    visibility: hidden;
+}
+
+/* Phone: the left/right thirds and swipes turn pages; the text gets the whole width. */
+@media only screen and (max-width: 600px) {
+    body.anyfile-app .epub-viewer .epub-nav,
+    body.anyfile-app .epub-viewer .epub-nav.hidden {
+        display: none !important;
+    }
+}
+
+body.anyfile-app .epub-viewer .sidebar,
+body.anyfile-app .epub-viewer .sidebar .tab-container {
+    background: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBar-foreground);
+}
+
+body.anyfile-app .epub-viewer .sidebar .tab-list {
+    background: var(--vscode-editorWidget-background);
+    border-bottom-color: var(--vscode-widget-border);
+}
+
+body.anyfile-app .epub-viewer .sidebar .tab-list .item.active,
+body.anyfile-app .epub-viewer .sidebar .toc-list .item.active,
+body.anyfile-app .epub-viewer .sidebar .settings .setting-content a {
+    color: var(--anyfile-accent);
+    border-bottom-color: var(--anyfile-accent);
+}
+
+body.anyfile-app .epub-viewer .sidebar .toc-list .item,
+body.anyfile-app .epub-viewer .sidebar .toc-list .item:link,
+body.anyfile-app .epub-viewer .sidebar .toc-list .item:visited {
+    line-height: 44px;
+    padding: 0 12px;
+}
+
+body.anyfile-app .epub-viewer .sidebar .toc-list .item .page {
+    color: var(--vscode-descriptionForeground);
+}
+
+body.anyfile-app .epub-viewer .sidebar .toc-list .item:hover,
+body.anyfile-app .epub-viewer .sidebar .toc-list .item.active {
+    background: var(--vscode-list-hoverBackground);
+}
+
+body.anyfile-app .epub-viewer .sidebar .search-bar {
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-color: var(--vscode-input-border);
+}
+
+body.anyfile-app .epub-viewer .sidebar .search-bar .search-box {
+    padding: 8px;
+    font-size: 16px;
+}
+
+body.anyfile-app .epub-viewer .sidebar .search-bar .search-button {
+    width: 44px;
+    border-left-color: var(--vscode-input-border);
+}
+
+body.anyfile-app .epub-viewer .sidebar .search-results .item,
+body.anyfile-app .epub-viewer .sidebar .search-results .item:link,
+body.anyfile-app .epub-viewer .sidebar .search-results .item:visited {
+    background: var(--vscode-editorWidget-background);
+}
+
+body.anyfile-app .epub-viewer .sidebar .setting,
+body.anyfile-app .epub-viewer .sidebar .info .description {
+    border-color: var(--vscode-widget-border);
+}
+
+body.anyfile-app .epub-viewer .sidebar .settings .chips .chip {
+    padding: 6px 12px;
+    border-color: var(--vscode-widget-border);
+}
+
+body.anyfile-app .epub-viewer .sidebar .settings .chips .chip.active {
+    border-color: var(--anyfile-accent);
+}

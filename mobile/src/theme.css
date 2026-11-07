@@ -6,6 +6,9 @@
   --vscode-font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --vscode-font-size: 13px;
   --vscode-foreground: #1c1c1e;
+  --vscode-editor-foreground: #1c1c1e;
+  --vscode-textLink-foreground: var(--anyfile-accent);
+  --vscode-editorGroupHeader-tabsBackground: #f2f2f7;
   --vscode-descriptionForeground: #6e6e73;
   --vscode-icon-foreground: #1c1c1e;
   --vscode-editor-background: #e5e5ea;
@@ -49,6 +52,8 @@
   :root {
     --anyfile-accent: #0a84ff;
     --vscode-foreground: #f2f2f7;
+    --vscode-editor-foreground: #f2f2f7;
+    --vscode-editorGroupHeader-tabsBackground: #1c1c1e;
     --vscode-descriptionForeground: #98989f;
     --vscode-icon-foreground: #f2f2f7;
     --vscode-editor-background: #000000;

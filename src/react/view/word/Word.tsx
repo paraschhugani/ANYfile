@@ -5,7 +5,12 @@ import "@eigenpal/docx-editor-react/styles.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handler, vscodeApi } from "../../util/vscode";
 import { loadOfficeBuffer } from "../../util/loadOfficeContent";
+import { getConfigs } from "../../util/vscodeConfig";
+import { initialFitZoom, useMobileZoom } from "./mobileZoom";
 import "./Word.css";
+
+/** The ANYfile iPhone/iPad app: view only, the page fits the screen and pinches to zoom (mobileZoom.ts). */
+const MOBILE = getConfigs()?.mobile === true;
 
 type WordColorMode = "light" | "adaptive";
 
@@ -46,6 +51,7 @@ interface WordOpenPayload {
 }
 
 export default function Word() {
+    const viewerRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<DocxEditorRef>(null);
     const readOnlyRef = useRef(false);
     const [colorMode, setColorMode] = useState<WordColorMode>(loadWordColorMode);
@@ -91,7 +97,7 @@ export default function Word() {
         setDocumentBuffer(undefined);
 
         try {
-            const fileReadOnly = payload.readOnly === true;
+            const fileReadOnly = payload.readOnly === true || MOBILE;
             readOnlyRef.current = fileReadOnly;
             setReadOnly(fileReadOnly);
             setFileName(payload.fileName ?? "");
@@ -115,6 +121,8 @@ export default function Word() {
             .emit("init");
     }, [loadDocument]);
 
+    useMobileZoom(MOBILE, viewerRef, editorRef, documentBuffer);
+
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.code === "KeyS") {
@@ -127,7 +135,7 @@ export default function Word() {
     }, [handleSave]);
 
     return (
-        <div className={`word-viewer${adaptiveColorMode ? " word-viewer--vscode-theme" : ""}`}>
+        <div ref={viewerRef} className={`word-viewer${adaptiveColorMode ? " word-viewer--vscode-theme" : ""}`}>
             <button
                 type="button"
                 className="dark-mode-toggle"
@@ -139,7 +147,7 @@ export default function Word() {
             </button>
             <Spin spinning={loading} fullscreen />
             {error && <Alert type="error" message={error} showIcon style={{ margin: 16 }} />}
-            {readOnly && !loading && !error && documentBuffer && (
+            {readOnly && !MOBILE && !loading && !error && documentBuffer && (
                 <div className="word-readonly-banner">Read-only — edits will be saved to a new file</div>
             )}
             {documentBuffer && !loading && !error && (
@@ -153,6 +161,7 @@ export default function Word() {
                         documentNameEditable={false}
                         readOnly={readOnly}
                         {...(readOnly ? { mode: "viewing" as const } : {})}
+                        {...(MOBILE ? { initialZoom: initialFitZoom(), showOutlineButton: false } : {})}
                         commentsSidebarOpen={commentsSidebarOpen}
                         onCommentsSidebarOpenChange={(open) => {
                             if (open && skipCommentsAutoOpenRef.current) {

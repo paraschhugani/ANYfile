@@ -1,0 +1,254 @@
+// The font viewer in the ANYfile app (iPhone/iPad). body.anyfile-app only exists there, never in VS Code;
+// the colors are the app theme's --vscode-* variables (light and dark).
+body.anyfile-app .font-viewer-mobile {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--vscode-editorWidget-background);
+    color: var(--vscode-foreground);
+    font-family: var(--vscode-font-family);
+
+    .fv-toolbar {
+        flex-shrink: 0;
+        padding: 8px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+        background-color: var(--vscode-titleBar-activeBackground);
+        border-bottom: 0.5px solid var(--vscode-widget-border);
+    }
+
+    .fv-search-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .fv-search {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 4px 0 10px;
+        border-radius: 10px;
+        background-color: var(--vscode-list-hoverBackground);
+        color: var(--vscode-descriptionForeground);
+
+        input {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            border: none;
+            outline: none;
+            background: none;
+            color: var(--vscode-foreground);
+            // 16px: iOS zooms into smaller inputs on focus.
+            font: 16px var(--vscode-font-family);
+
+            &::placeholder {
+                color: var(--vscode-descriptionForeground);
+            }
+        }
+    }
+
+    .fv-search-clear {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        color: var(--vscode-descriptionForeground);
+        font-size: 15px;
+    }
+
+    .fv-info-button {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin: -4px -8px -4px 0;
+        color: var(--anyfile-accent, var(--vscode-focusBorder));
+        font-size: 22px;
+    }
+
+    .fv-count {
+        padding: 4px 2px 6px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--vscode-descriptionForeground);
+    }
+
+    .fv-grid {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .fv-spacer {
+        position: relative;
+    }
+
+    .fv-cells {
+        position: absolute;
+        right: 0;
+        left: 0;
+        display: grid;
+    }
+
+    .glyph-cell {
+        display: block;
+        width: 100%;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        // Hairlines between the cells (a shadow does not change the canvas size).
+        box-shadow: inset -0.5px -0.5px 0 var(--vscode-widget-border);
+
+        &:active {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+
+        &.selected {
+            background-color: var(--vscode-list-hoverBackground);
+            box-shadow: inset 0 0 0 2px var(--anyfile-accent, var(--vscode-focusBorder));
+        }
+    }
+
+    .fv-message {
+        padding: 32px 24px;
+        text-align: center;
+        font-size: 15px;
+        color: var(--vscode-descriptionForeground);
+        word-break: break-word;
+    }
+
+    // The sheet for a glyph or the font's details; the grid stays where it was behind it.
+    .fv-sheet-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .fv-sheet-backdrop {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        animation: font-viewer-mobile-fade-in 200ms ease-out;
+    }
+
+    .fv-sheet {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        max-height: 85%;
+        margin: 0 auto;
+        overflow-y: auto;
+        padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+        border-radius: 14px 14px 0 0;
+        background-color: var(--vscode-sideBar-background);
+        color: var(--vscode-foreground);
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
+        animation: font-viewer-mobile-slide-up 220ms ease-out;
+    }
+
+    .fv-sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 52px;
+    }
+
+    .fv-sheet-title {
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .fv-sheet-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // A 44px touch target around the visible 30px circle.
+        width: 44px;
+        height: 44px;
+        margin-right: -9px;
+        padding: 7px;
+        border-radius: 50%;
+        background-clip: content-box;
+        background-color: var(--vscode-button-secondaryBackground);
+        color: var(--vscode-descriptionForeground);
+        font-size: 13px;
+    }
+
+    .fv-preview {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        background-color: var(--vscode-editorWidget-background);
+    }
+
+    .fv-info {
+        padding: 0 12px;
+        border-radius: 10px;
+        background-color: var(--vscode-editorWidget-background);
+        font-size: 15px;
+
+        > div {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 11px 0;
+            border-bottom: 0.5px solid var(--vscode-widget-border);
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+
+        dt {
+            flex-shrink: 0;
+            width: 72px;
+            color: var(--vscode-descriptionForeground);
+            user-select: none;
+        }
+
+        dd {
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+            word-break: break-all;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+    }
+}
+
+// A darker backdrop so the (dark) sheet stands out from the dark grid.
+@media (prefers-color-scheme: dark) {
+    body.anyfile-app .font-viewer-mobile .fv-sheet-backdrop {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+}
+
+@keyframes font-viewer-mobile-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes font-viewer-mobile-slide-up {
+    from {
+        transform: translateY(100%);
+    }
+}

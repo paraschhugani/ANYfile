@@ -401,3 +401,67 @@ html:has(.word-viewer) {
 .word-viewer--vscode-theme .layout-table-edge-handle-right:hover {
     background-color: var(--doc-focus-ring);
 }
+
+/* ── ANYfile app (iPhone / iPad, body.anyfile-app): view only; the page fits the screen width (mobileZoom.ts) ── */
+
+/* #root sits below the app's bar: don't stretch it (or the viewer) to the full screen height */
+body.anyfile-app #root {
+    height: auto;
+    min-height: 0;
+}
+
+body.anyfile-app .word-viewer {
+    height: 100%;
+    min-height: 0;
+}
+
+/* Pinches go to mobileZoom.ts, one finger scrolls */
+body.anyfile-app .word-viewer .docx-editor__scroll-container {
+    touch-action: pan-x pan-y;
+}
+
+/* The scroll area is as wide as the zoomed page (the editor keeps its desktop minimum width otherwise) */
+body.anyfile-app .word-viewer .docx-editor__scroll-container > div {
+    min-width: var(--word-mobile-min-width, 0px) !important;
+}
+
+/* Nothing beside or below the zoomed pages: the editor's negative bottom margin (zoom < 1) must not collapse
+   through this box, which would keep the page height at zoom 1 */
+body.anyfile-app .word-viewer .paged-editor {
+    display: flow-root;
+    overflow-x: clip !important;
+}
+
+/* A new zoom shows at once (the pinch already animated it) */
+body.anyfile-app .word-viewer .paged-editor > div:has(> .paged-editor__pages) {
+    transition: none !important;
+}
+
+/* While two fingers zoom: the pages follow them, nothing scrolls */
+body.anyfile-app .word-viewer--pinching .docx-editor__scroll-container {
+    overflow: hidden !important;
+}
+
+body.anyfile-app .word-viewer--pinching .docx-editor__scroll-container > div {
+    transform: var(--word-pinch-transform, none);
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+/* Below the app's bar, inside the viewer */
+body.anyfile-app .word-viewer .dark-mode-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    font-size: 15px;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+/* The editor's page indicator counts pages at zoom 1, so it is wrong at the fitted zoom */
+body.anyfile-app .word-viewer .docx-editor [role="status"][aria-live="polite"] {
+    display: none;
+}

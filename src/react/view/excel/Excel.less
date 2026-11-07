@@ -1947,3 +1947,118 @@ body.office-dark .frp-panel {
         &.frp-status-error { color: #f87171; }
     }
 }
+
+// ─── ANYfile app (iPhone / iPad) ──────────────────────────────────────────────
+// mobile/src/reactBridge.ts adds body.anyfile-app (never set in VS Code) and puts the viewer in #root,
+// a fixed box below the app's bar.
+body.anyfile-app #root .excel-viewer {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    // Its fixed-position parts (theme toggle, find panel, loading and error overlays) stay inside #root.
+    transform: translate(0, 0);
+    background-color: var(--excel-header-bg);
+
+    // The grid's size (Excel.tsx: view), clear of the home indicator and the landscape notch.
+    #container {
+        position: absolute;
+        top: 0;
+        right: env(safe-area-inset-right);
+        bottom: env(safe-area-inset-bottom);
+        left: env(safe-area-inset-left);
+        overflow: hidden;
+    }
+
+    .x-spreadsheet-sheet,
+    .x-spreadsheet-bottombar {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+
+        input,
+        textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+    }
+
+    // Sheet tabs tall enough to tap. On a phone the tab strip gets the whole width: it scrolls with a
+    // swipe and the "more" button lists every sheet, so no scroll buttons.
+    .x-spreadsheet-bottombar .x-spreadsheet-menu > li {
+        height: 32px;
+        line-height: 32px;
+    }
+
+    @media (max-width: 600px) {
+        .x-spreadsheet-bottombar .x-spreadsheet-sheet-nav {
+            display: none;
+        }
+    }
+
+    // The sheets that do not fit: the menu opens leftwards from its button, at the right end, with rows
+    // tall enough to tap.
+    .x-spreadsheet-bottombar .x-spreadsheet-sheet-more-menu {
+        left: auto;
+        right: 0;
+        max-height: min(320px, 60vh);
+    }
+
+    .x-spreadsheet-bottombar .x-spreadsheet-sheet-more-item {
+        padding: 10px 16px;
+        font-size: 15px;
+    }
+
+    .dark-mode-toggle {
+        right: calc(env(safe-area-inset-right) + 10px);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .frp-panel {
+        right: calc(env(safe-area-inset-right) + 8px);
+        max-width: calc(100% - 16px - env(safe-area-inset-left) - env(safe-area-inset-right));
+        box-sizing: border-box;
+    }
+}
+
+// Messages (antd, in <body>) below the app's bar.
+html body.anyfile-app:has(.excel-app) .ant-message {
+    top: calc(env(safe-area-inset-top) + var(--anyfile-bar-height, 44px) + 8px) !important;
+}
+
+// Adaptive colors follow the app's theme (mobile/src/theme.css): a white grid in light appearance,
+// a black one in dark.
+body.anyfile-app.office-adaptive #root .excel-viewer {
+    --excel-bg: var(--vscode-editorWidget-background, #ffffff);
+    --excel-cell-bg: var(--vscode-editorWidget-background, #ffffff);
+    --excel-fg: var(--vscode-foreground, #1c1c1e);
+    --excel-header-bg: var(--vscode-sideBar-background, #f2f2f7);
+    --excel-header-fg: var(--vscode-descriptionForeground, #6e6e73);
+    --excel-grid-line: var(--vscode-panel-border, rgba(60, 60, 67, 0.18));
+    --excel-border: var(--vscode-panel-border, rgba(60, 60, 67, 0.18));
+    --excel-muted-line: var(--vscode-panel-border, rgba(60, 60, 67, 0.18));
+    --excel-hover: var(--vscode-list-hoverBackground, rgba(120, 120, 128, 0.12));
+    --excel-accent: var(--anyfile-accent, #007aff);
+    --excel-active-fg: var(--anyfile-accent, #007aff);
+    --excel-active-bg: color-mix(in srgb, var(--anyfile-accent, #007aff) 14%, transparent);
+    --excel-selection: var(--anyfile-accent, #007aff);
+    --excel-selection-fill: color-mix(in srgb, var(--anyfile-accent, #007aff) 16%, transparent);
+    --excel-scrollbar-track: var(--excel-header-bg);
+    --excel-input-bg: var(--vscode-input-background, #ffffff);
+    --excel-input-fg: var(--vscode-input-foreground, #1c1c1e);
+    --excel-widget-bg: var(--vscode-editorWidget-background, #ffffff);
+    --excel-widget-fg: var(--vscode-editorWidget-foreground, #1c1c1e);
+
+    .dark-mode-toggle {
+        background-color: var(--excel-header-bg);
+        color: var(--excel-fg);
+        border-color: var(--excel-border);
+    }
+}
+
+body.anyfile-app.office-adaptive.office-dark #root .excel-viewer {
+    --excel-bg: var(--vscode-editor-background, #000000);
+    --excel-cell-bg: var(--vscode-editor-background, #000000);
+}

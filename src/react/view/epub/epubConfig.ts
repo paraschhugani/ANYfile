@@ -1,6 +1,37 @@
 import ePub, { Book, NavItem, Rendition } from 'epubjs';
+import { getConfigs } from '../../util/vscodeConfig';
 
 export const STORAGE_PREFIX = 'ePubViewer:';
+
+/** The ANYfile iPhone/iPad app (not VS Code). */
+export function isMobileApp(): boolean {
+    return getConfigs()?.mobile === true;
+}
+
+/** localStorage that never throws: full or unavailable storage must not stop a book from opening. */
+export function readStorage(key: string): string | null {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+}
+
+export function writeStorage(key: string, value: string) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // full or unavailable storage: not remembered
+    }
+}
+
+function removeStorage(key: string) {
+    try {
+        localStorage.removeItem(key);
+    } catch {
+        // ignore storage errors
+    }
+}
 
 export const THEME_OPTIONS = [
     { label: 'A', value: '#fff;#000', bg: '#fff', fg: '#000' },
@@ -39,6 +70,16 @@ export const DEFAULT_SETTINGS: EpubSettings = {
     lineSpacing: '1.6',
 };
 
+const MOBILE_DARK_THEME = '#000;#fff';
+
+/** The theme when none was picked: in the app it follows the system appearance. */
+export function defaultEpubTheme(): string {
+    if (isMobileApp() && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+        return MOBILE_DARK_THEME;
+    }
+    return DEFAULT_SETTINGS.theme;
+}
+
 const PLACEHOLDER_AUTHORS = new Set(['unknown', 'n/a', 'na', 'none', 'anonymous']);
 
 /** Normalize EPUB creator metadata; omit placeholders and missing values. */
@@ -68,9 +109,9 @@ export function resolveEpubAuthor(creator: unknown): string {
 
 export function loadEpubSettings(): EpubSettings {
     const read = (storageKey: string, fallback: string) =>
-        localStorage.getItem(`${STORAGE_PREFIX}${storageKey}`) ?? fallback;
+        readStorage(`${STORAGE_PREFIX}${storageKey}`) ?? fallback;
     return {
-        theme: read('theme', DEFAULT_SETTINGS.theme),
+        theme: read('theme', defaultEpubTheme()),
         font: read('font', DEFAULT_SETTINGS.font),
         fontSize: read('font-size', DEFAULT_SETTINGS.fontSize),
         lineSpacing: read('line-spacing', DEFAULT_SETTINGS.lineSpacing),
@@ -85,11 +126,22 @@ const SETTING_STORAGE_KEYS: Record<keyof EpubSettings, string> = {
 };
 
 export function saveEpubSetting(key: keyof EpubSettings, value: string) {
-    localStorage.setItem(`${STORAGE_PREFIX}${SETTING_STORAGE_KEYS[key]}`, value);
+    writeStorage(`${STORAGE_PREFIX}${SETTING_STORAGE_KEYS[key]}`, value);
+}
+
+export function hasStoredEpubSetting(key: keyof EpubSettings): boolean {
+    return readStorage(`${STORAGE_PREFIX}${SETTING_STORAGE_KEYS[key]}`) !== null;
 }
 
 /** Reset reader display settings to defaults (theme, font, etc.). */
 export function resetEpubSettings(): EpubSettings {
+    if (isMobileApp()) {
+        // Forget the choices, so the theme follows the system appearance again.
+        for (const key of Object.keys(SETTING_STORAGE_KEYS) as (keyof EpubSettings)[]) {
+            removeStorage(`${STORAGE_PREFIX}${SETTING_STORAGE_KEYS[key]}`);
+        }
+        return loadEpubSettings();
+    }
     const next = { ...DEFAULT_SETTINGS };
     for (const key of Object.keys(SETTING_STORAGE_KEYS) as (keyof EpubSettings)[]) {
         saveEpubSetting(key, next[key]);
@@ -143,6 +195,90 @@ export function bindReaderMetaKeyRelay(doc: Document) {
             const newEvent = new evt.constructor(evt.type, evt) as Event;
             window.parent.document.body.dispatchEvent(newEvent);
         }
+    });
+}
+
+export type ReaderTapZone = 'prev' | 'middle' | 'next';
+
+/** Which third of the reader a point in the reader iframe (its client x) falls in. */
+export function readerTapZone(doc: Document, clientX: number, container: HTMLElement): ReaderTapZone {
+    const frame = doc.defaultView?.frameElement;
+    const x = (frame ? frame.getBoundingClientRect().left : 0) + clientX - container.getBoundingClientRect().left;
+    const third = container.clientWidth / 3;
+    if (x < third) {
+        return 'prev';
+    }
+    return x > third * 2 ? 'next' : 'middle';
+}
+
+const SWIPE_MIN_DISTANCE = 40;
+const TAP_MAX_MOVE = 10;
+const TAP_MAX_MS = 500;
+/** A click this soon after a touch is the tap's own click (already handled on touchend). */
+const TOUCH_CLICK_MS = 1000;
+const boundTouchDocuments = new WeakSet<Document>();
+
+function isLinkTarget(target: EventTarget | null): boolean {
+    return !!(target as Element | null)?.closest?.('a[href]');
+}
+
+/**
+ * App (touch): in the reader iframe, a swipe left/right turns to the next/previous page, and a tap (or a click,
+ * on iPad with a pointer) on the left/right third turns pages; the middle third calls `zones.middle`.
+ */
+export function bindReaderTouchNav(
+    doc: Document,
+    getContainer: () => HTMLElement | null | undefined,
+    zones: Record<ReaderTapZone, () => void>,
+) {
+    if (!doc || boundTouchDocuments.has(doc)) {
+        return;
+    }
+    boundTouchDocuments.add(doc);
+    doc.documentElement?.style.setProperty('-webkit-tap-highlight-color', 'transparent');
+    let start: { x: number; y: number; time: number } | null = null;
+    let lastTouch = 0;
+    const selecting = () => !!doc.getSelection()?.toString();
+    const tap = (target: EventTarget | null, clientX: number) => {
+        const container = getContainer();
+        if (!container || selecting() || isLinkTarget(target)) {
+            return;
+        }
+        zones[readerTapZone(doc, clientX, container)]();
+    };
+    doc.addEventListener('touchstart', (evt: TouchEvent) => {
+        lastTouch = Date.now();
+        const touch = evt.touches[0];
+        start = evt.touches.length === 1 && touch ? { x: touch.clientX, y: touch.clientY, time: lastTouch } : null;
+    }, { passive: true });
+    doc.addEventListener('touchcancel', () => {
+        start = null;
+    }, { passive: true });
+    doc.addEventListener('touchend', (evt: TouchEvent) => {
+        lastTouch = Date.now();
+        const from = start;
+        const touch = evt.changedTouches[0];
+        start = null;
+        if (!from || !touch || evt.touches.length > 0) {
+            return;
+        }
+        const dx = touch.clientX - from.x;
+        const dy = touch.clientY - from.y;
+        if (Math.abs(dx) >= SWIPE_MIN_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            if (!selecting()) {
+                zones[dx < 0 ? 'next' : 'prev']();
+            }
+            return;
+        }
+        if (Math.abs(dx) <= TAP_MAX_MOVE && Math.abs(dy) <= TAP_MAX_MOVE && lastTouch - from.time <= TAP_MAX_MS) {
+            tap(evt.target, touch.clientX);
+        }
+    }, { passive: true });
+    doc.addEventListener('click', (evt: MouseEvent) => {
+        if (Date.now() - lastTouch < TOUCH_CLICK_MS || evt.button !== 0) {
+            return;
+        }
+        tap(evt.target, evt.clientX);
     });
 }
 
@@ -483,11 +619,15 @@ export async function loadEpubBook(buffer: ArrayBuffer) {
 
 export async function ensureLocations(book: Book, chars = 1650) {
     const key = `${book.key()}:locations-${chars}`;
-    const stored = localStorage.getItem(key);
+    const stored = readStorage(key);
     if (stored) {
-        book.locations.load(stored);
-        return;
+        try {
+            book.locations.load(stored);
+            return;
+        } catch {
+            // unreadable cache: generate them again
+        }
     }
     await book.locations.generate(chars);
-    localStorage.setItem(key, book.locations.save());
+    writeStorage(key, book.locations.save());
 }

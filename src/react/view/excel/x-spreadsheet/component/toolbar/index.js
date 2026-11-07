@@ -175,6 +175,11 @@ export default class Toolbar {
 
     const { extendToolbar = {} } = data.settings;
 
+    // Viewing only (no editing at all): keep the items that do not change the file.
+    if (data.settings.viewOnlyToolbar) {
+      this.items = [[this.findEl, this.freezeEl]];
+    }
+
     if (extendToolbar.left && extendToolbar.left.length > 0) {
       this.items.unshift(buildDivider());
       const btns = extendToolbar.left.map(genBtn.bind(this));

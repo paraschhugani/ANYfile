@@ -13,21 +13,27 @@ import { loadOfficeBuffer } from '../../util/loadOfficeContent';
 import {
     applyEpubTheme,
     bindReaderMetaKeyRelay,
+    bindReaderTouchNav,
     buildTocPageMap,
+    defaultEpubTheme,
     ensureLocations,
     EpubSettings,
     FONT_OPTIONS,
     FONT_SIZE_OPTIONS,
     getNavItem,
+    hasStoredEpubSetting,
+    isMobileApp,
     LINE_SPACING_OPTIONS,
     loadEpubBook,
     loadEpubSettings,
+    readStorage,
     resetEpubSettings,
     resolveEpubAuthor,
     saveEpubSetting,
     searchEpubBook,
     SearchHit,
     THEME_OPTIONS,
+    writeStorage,
 } from './epubConfig';
 import './Epub.css';
 
@@ -175,9 +181,16 @@ export default function Epub() {
             if (doc) {
                 bindReaderMetaKeyRelay(doc);
                 doc.onwheel = (e: WheelEvent) => handleReaderWheel(rendition, e);
+                if (isMobileApp()) {
+                    bindReaderTouchNav(doc, () => readerRef.current, {
+                        prev: () => rendition.prev(),
+                        next: () => rendition.next(),
+                        middle: openSidebar,
+                    });
+                }
             }
         });
-    }, [handleReaderWheel]);
+    }, [handleReaderWheel, openSidebar]);
 
     const onRelocated = useCallback((location: {
         start: { cfi: string; href: string; location?: number; percentage?: number };
@@ -201,7 +214,7 @@ export default function Epub() {
 
         setAtStart(!!location.atStart);
         setAtEnd(!!location.atEnd);
-        localStorage.setItem(`${book.key()}:pos`, location.start.cfi);
+        writeStorage(`${book.key()}:pos`, location.start.cfi);
     }, []);
 
     const updateSetting = useCallback((key: keyof EpubSettings, value: string) => {
@@ -247,6 +260,9 @@ export default function Epub() {
             }
         });
         rendition.on('click', (event: MouseEvent) => {
+            if (isMobileApp()) {
+                return; // taps and clicks are handled by bindReaderTouchNav
+            }
             try {
                 const target = event.target as HTMLElement;
                 if (target.tagName.toLowerCase() === 'a') {
@@ -317,8 +333,11 @@ export default function Epub() {
             bindRendition(rendition);
             applyEpubTheme(rendition, settingsRef.current, appRef.current);
 
-            const storedPos = localStorage.getItem(`${book.key()}:pos`);
+            const storedPos = readStorage(`${book.key()}:pos`);
             await rendition.display(storedPos || undefined);
+            if (isMobileApp()) {
+                setLoading(false); // the page can be turned while the locations are generated
+            }
             await ensureLocations(book);
             const pageMap = await buildTocPageMap(book, navigation.toc ?? []);
             setTocPageByHref(pageMap);
@@ -459,6 +478,27 @@ export default function Epub() {
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [flashNav, goNext, goPrev]);
+
+    useEffect(() => {
+        if (!isMobileApp() || !window.matchMedia) {
+            return;
+        }
+        // App: unless a theme was picked, the book follows the system appearance.
+        const query = window.matchMedia('(prefers-color-scheme: dark)');
+        const onChange = () => {
+            if (hasStoredEpubSetting('theme')) {
+                return;
+            }
+            const next = { ...settingsRef.current, theme: defaultEpubTheme() };
+            settingsRef.current = next;
+            setSettings(next);
+            if (renditionRef.current) {
+                applyEpubTheme(renditionRef.current, next, appRef.current);
+            }
+        };
+        query.addEventListener('change', onChange);
+        return () => query.removeEventListener('change', onChange);
+    }, []);
 
     useEffect(() => {
         const onResize = () => {

@@ -3,13 +3,20 @@ import { Card, Flex, Input } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useWindowSize } from '../../util/reactUtils'
 import { handler } from '../../util/vscode'
+import { getConfigs } from '../../util/vscodeConfig'
 import './FontViewer.less'
+import FontViewerMobile from './FontViewerMobile'
 import { FontInfo, formatUnicode, loadFont, renderGlyphItem, renderGlyphPreview } from './fontViewerMain'
+
+export default function FontViewer() {
+    // The ANYfile app (iPhone/iPad) has its own layout; VS Code keeps the one below.
+    return getConfigs()?.mobile === true ? <FontViewerMobile /> : <DesktopFontViewer />
+}
 
 /**
  * https://github.com/mathew-kurian/CharacterMap
  */
-export default function FontViewer() {
+function DesktopFontViewer() {
     const [font, setFont] = useState(null)
     const [search, setSearch] = useState('')
     const fontInfoRef = useRef<FontInfo>(null)

@@ -6,6 +6,7 @@ import '@vscode/codicons/dist/codicon.css';
 import { $t } from '../../i18n/i18nConfig.ts';
 import { handler, vscodeApi } from '../../util/vscode.ts';
 import { loadOfficeBuffer } from '../../util/loadOfficeContent.ts';
+import { getConfigs } from '../../util/vscodeConfig.ts';
 import {
     formatCellValue,
     getPageSize,
@@ -21,6 +22,8 @@ import './Parquet.less';
 
 const PAGE_SIZE = getPageSize();
 const PARQUET_VSCODE_THEME_KEY = 'parquet-vscode-theme';
+// The ANYfile iOS/iPadOS app: schema collapsed above a full-width table, no Save while read-only.
+const MOBILE = getConfigs()?.mobile === true;
 
 type ColumnIconKind = 'bool' | 'numeric' | 'string' | 'datetime' | 'structure' | 'field';
 
@@ -82,12 +85,14 @@ function ParquetViewer() {
     const [saving, setSaving] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [vscodeTheme, setVscodeTheme] = useState(loadParquetVscodeTheme);
+    const [schemaOpen, setSchemaOpen] = useState(false);
     const readOnlyRef = useRef(false);
     const fileInfoRef = useRef<ParquetFileInfo | null>(null);
     const allRowsRef = useRef<Record<string, unknown>[]>([]);
     const dirtyRef = useRef(false);
     const savingRef = useRef(false);
     const editInputRef = useRef<InputRef | null>(null);
+    const tableWrapRef = useRef<HTMLDivElement | null>(null);
 
     const totalPages = useMemo(() => {
         if (!fileInfo?.rowCount) return 1;
@@ -223,7 +228,7 @@ function ParquetViewer() {
                 dataIndex: column.name,
                 key: column.name,
                 ellipsis: true,
-                minWidth: 120,
+                minWidth: MOBILE ? 96 : 120,
                 render: (value: unknown, _row, index) => {
                     const rowIndex = page * PAGE_SIZE + index;
                     const editing = editingRow === rowIndex && editingColumn === column.name;
@@ -281,7 +286,58 @@ function ParquetViewer() {
             .emit('init');
     }, [loadParquet, message]);
 
+    // On the phone the new page starts at its first row (the pager is below the table).
+    useEffect(() => {
+        if (!MOBILE) return;
+        tableWrapRef.current?.querySelector('.ant-table-body')?.scrollTo({ top: 0 });
+    }, [page]);
+
     const tableHeight = 'calc(100vh - 132px)';
+
+    const schemaMeta = fileInfo && (
+        <div className="parquet-viewer__meta">
+            <div className="parquet-viewer__stat">
+                <span className="parquet-viewer__stat-label">
+                    <span className="codicon codicon-list-flat parquet-icon parquet-icon--rows" />
+                    {$t('parquet.rows')}
+                </span>
+                <span className="parquet-viewer__stat-value">{fileInfo.rowCount.toLocaleString()}</span>
+            </div>
+            <div className="parquet-viewer__stat">
+                <span className="parquet-viewer__stat-label">
+                    <span className="codicon codicon-symbol-field parquet-icon parquet-icon--columns" />
+                    {$t('parquet.columnsLabel')}
+                </span>
+                <span className="parquet-viewer__stat-value">{fileInfo.columns.length}</span>
+            </div>
+            {fileInfo.createdBy && (
+                <div className="parquet-viewer__stat parquet-viewer__stat--wide" title={fileInfo.createdBy}>
+                    <span className="parquet-viewer__stat-label">
+                        <span className="codicon codicon-account parquet-icon parquet-icon--author" />
+                        {$t('parquet.createdBy')}
+                    </span>
+                    <span className="parquet-viewer__stat-value">
+                        {fileInfo.createdBy.length > 48 ? `${fileInfo.createdBy.slice(0, 48)}…` : fileInfo.createdBy}
+                    </span>
+                </div>
+            )}
+        </div>
+    );
+
+    const schemaList = (
+        <div className="parquet-viewer__list">
+            {fileInfo?.columns.map((column) => {
+                const { icon, kind } = resolveColumnIcon(column.type);
+                return (
+                <div key={column.name} className="parquet-viewer__list-item">
+                    <span className={`codicon parquet-viewer__list-icon parquet-viewer__list-icon--${kind} ${icon}`} />
+                    <span className="parquet-viewer__list-name" title={column.name}>{column.name}</span>
+                    <span className="parquet-viewer__list-type">{column.type}</span>
+                </div>
+                );
+            })}
+        </div>
+    );
 
     return (
         <div className={`parquet-viewer${vscodeTheme ? '' : ' parquet-viewer--light'}`}>
@@ -292,57 +348,20 @@ function ParquetViewer() {
                 </div>
             )}
             <div className="parquet-viewer__body">
-                <aside className="parquet-viewer__sider">
-                    <div className="parquet-viewer__sider-inner">
-                        <div className="parquet-viewer__sider-header">
-                            <span className="codicon codicon-symbol-structure parquet-icon parquet-icon--schema" />
-                            {$t('parquet.schema')}
-                        </div>
-                        {fileInfo && (
-                            <div className="parquet-viewer__meta">
-                                <div className="parquet-viewer__stat">
-                                    <span className="parquet-viewer__stat-label">
-                                        <span className="codicon codicon-list-flat parquet-icon parquet-icon--rows" />
-                                        {$t('parquet.rows')}
-                                    </span>
-                                    <span className="parquet-viewer__stat-value">{fileInfo.rowCount.toLocaleString()}</span>
-                                </div>
-                                <div className="parquet-viewer__stat">
-                                    <span className="parquet-viewer__stat-label">
-                                        <span className="codicon codicon-symbol-field parquet-icon parquet-icon--columns" />
-                                        {$t('parquet.columnsLabel')}
-                                    </span>
-                                    <span className="parquet-viewer__stat-value">{fileInfo.columns.length}</span>
-                                </div>
-                                {fileInfo.createdBy && (
-                                    <div className="parquet-viewer__stat parquet-viewer__stat--wide" title={fileInfo.createdBy}>
-                                        <span className="parquet-viewer__stat-label">
-                                            <span className="codicon codicon-account parquet-icon parquet-icon--author" />
-                                            {$t('parquet.createdBy')}
-                                        </span>
-                                        <span className="parquet-viewer__stat-value">
-                                            {fileInfo.createdBy.length > 48 ? `${fileInfo.createdBy.slice(0, 48)}…` : fileInfo.createdBy}
-                                        </span>
-                                    </div>
-                                )}
+                {!MOBILE && (
+                    <aside className="parquet-viewer__sider">
+                        <div className="parquet-viewer__sider-inner">
+                            <div className="parquet-viewer__sider-header">
+                                <span className="codicon codicon-symbol-structure parquet-icon parquet-icon--schema" />
+                                {$t('parquet.schema')}
                             </div>
-                        )}
-                        <div className="parquet-viewer__list">
-                            {fileInfo?.columns.map((column) => {
-                                const { icon, kind } = resolveColumnIcon(column.type);
-                                return (
-                                <div key={column.name} className="parquet-viewer__list-item">
-                                    <span className={`codicon parquet-viewer__list-icon parquet-viewer__list-icon--${kind} ${icon}`} />
-                                    <span className="parquet-viewer__list-name" title={column.name}>{column.name}</span>
-                                    <span className="parquet-viewer__list-type">{column.type}</span>
-                                </div>
-                                );
-                            })}
+                            {schemaMeta}
+                            {schemaList}
                         </div>
-                    </div>
-                </aside>
+                    </aside>
+                )}
                 <main className="parquet-viewer__main">
-                    {readOnly && !loading && !error && fileInfo && (
+                    {!MOBILE && readOnly && !loading && !error && fileInfo && (
                         <div className="parquet-viewer__readonly-banner">
                             {$t('viewer.readOnly')}
                         </div>
@@ -358,16 +377,35 @@ function ParquetViewer() {
                         <>
                             <div className="parquet-viewer__toolbar">
                                 <div className="parquet-viewer__toolbar-left">
+                                    {MOBILE && (
+                                        <button
+                                            type="button"
+                                            className="parquet-viewer__schema-toggle"
+                                            aria-expanded={schemaOpen}
+                                            onClick={() => setSchemaOpen((open) => !open)}
+                                        >
+                                            <span className="codicon codicon-symbol-structure parquet-icon parquet-icon--schema" />
+                                            <span className="parquet-viewer__schema-toggle-label">{$t('parquet.schema')}</span>
+                                            <span className="parquet-viewer__schema-toggle-count">
+                                                {fileInfo.columns.length} {$t('parquet.columnsLabel')}
+                                            </span>
+                                            <span className={`codicon codicon-chevron-${schemaOpen ? 'up' : 'down'}`} />
+                                        </button>
+                                    )}
                                     {dirty && <span className="parquet-viewer__dirty-dot" title={$t('parquet.unsaved')} />}
-                                    <button
-                                        type="button"
-                                        className="parquet-viewer__save-btn"
-                                        disabled={!dirty || saving || readOnly}
-                                        onClick={handleSave}
-                                    >
-                                        <span className={`codicon ${saving ? 'codicon-loading codicon-modifier-spin' : 'codicon-save'}`} />
-                                        {$t('parquet.save')}
-                                    </button>
+                                    {MOBILE && readOnly ? (
+                                        <span className="parquet-viewer__view-only">View only</span>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="parquet-viewer__save-btn"
+                                            disabled={!dirty || saving || readOnly}
+                                            onClick={handleSave}
+                                        >
+                                            <span className={`codicon ${saving ? 'codicon-loading codicon-modifier-spin' : 'codicon-save'}`} />
+                                            {$t('parquet.save')}
+                                        </button>
+                                    )}
                                 </div>
                                 <button
                                     type="button"
@@ -379,7 +417,13 @@ function ParquetViewer() {
                                     {vscodeTheme ? <SunOutlined /> : <MoonOutlined />}
                                 </button>
                             </div>
-                            <div className="parquet-viewer__table-wrap">
+                            {MOBILE && schemaOpen && (
+                                <div className="parquet-viewer__schema-panel">
+                                    {schemaMeta}
+                                    {schemaList}
+                                </div>
+                            )}
+                            <div className="parquet-viewer__table-wrap" ref={tableWrapRef}>
                                 <Table<TableRow>
                                     className="parquet-table"
                                     dataSource={tableRows}

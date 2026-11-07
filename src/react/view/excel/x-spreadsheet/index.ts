@@ -34,6 +34,8 @@ export interface Options {
     showContextmenu?: boolean;
     showBottomBar?: boolean;
     showEditInVSCode?: boolean;
+    /** Toolbar with only the items that do not edit (find, freeze panes) plus extendToolbar. */
+    viewOnlyToolbar?: boolean;
     extendToolbar?: {
         left?: ExtendToolbarOption[];
         right?: ExtendToolbarOption[];
@@ -406,6 +408,12 @@ export class Spreadsheet {
         if (sheet.editor?.cell) {
             sheet.editor.applyCellStyle(sheet.data.getSelectedCellStyle());
         }
+        return this;
+    }
+
+    /** Lays the sheet out again for the current view size (options.view), e.g. after its container resized. */
+    resize(): this {
+        (this.sheet as any).reload();
         return this;
     }
 

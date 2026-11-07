@@ -3,6 +3,7 @@ import { App, Button, Modal, Radio, Spin } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handler, vscodeApi } from "../../util/vscode.ts";
 import { isVscodeEditorDark, observeVscodeThemeChange } from "../../util/vscodeTheme.ts";
+import { getConfigs } from "../../util/vscodeConfig.ts";
 import { loadOfficeBuffer } from "../../util/loadOfficeContent.ts";
 import './Excel.less';
 import { MIN_VIEW_COLS, MIN_VIEW_ROWS } from "./excel_meta.ts";
@@ -15,6 +16,9 @@ import { parseSpreadsheetLink } from './excel_hyperlink';
 import { initExcelLocale, t } from './excel_i18n';
 
 initExcelLocale();
+
+// The ANYfile iPhone / iPad app (mobile/src/reactBridge.ts): the viewer fills #root, below the app's bar.
+const isMobileApp = getConfigs()?.mobile === true;
 
 type ExcelColorMode = 'adaptive' | 'light';
 
@@ -39,7 +43,8 @@ function loadExcelColorMode(): ExcelColorMode {
             return 'light';
         }
     } catch { }
-    return 'light';
+    // The app follows the system's light / dark appearance unless the user picked light.
+    return isMobileApp ? 'adaptive' : 'light';
 }
 
 function saveExcelColorMode(mode: ExcelColorMode) {
@@ -118,6 +123,7 @@ function ExcelViewer() {
     const csvEncodingRef = useRef<'utf8' | 'gbk'>('utf8')
     const csvDelimiterRef = useRef(',')
     const initialFormattingRef = useRef('')
+    const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
     useEffect(() => {
         findPanelRef.current = findPanel;
@@ -327,9 +333,13 @@ function ExcelViewer() {
             const viewRowLen = Math.max(maxLength ?? 0, MIN_VIEW_ROWS);
             const viewColLen = Math.max(maxCols ?? 0, MIN_VIEW_COLS);
             container.innerHTML = '';
+            const viewOnlyApp = isMobileApp && fileReadOnly;
             const spreadSheet = new Spreadsheet(container, {
                 mode: fileReadOnly ? 'read' : 'edit',
                 showToolbar: true,
+                // In the app: nothing that edits, and a tap on a cell must not focus an input (the keyboard).
+                ...(isMobileApp ? { autoFocus: false } : {}),
+                ...(viewOnlyApp ? { viewOnlyToolbar: true, showContextmenu: false } : {}),
                 extendToolbar: {
                     right: [
                         {
@@ -349,9 +359,18 @@ function ExcelViewer() {
                 showEditInVSCode: isCsvLikeExt(payload.ext ?? ''),
                 row: { len: viewRowLen, height: 30 },
                 col: { len: viewColLen },
-                view: { height: () => window.innerHeight - 2 },
+                // In the app the viewer only has #root (Excel.less sizes #container to it).
+                view: isMobileApp
+                    ? { height: () => container.clientHeight, width: () => container.clientWidth }
+                    : { height: () => window.innerHeight - 2 },
             });
             spreadSheetRef.current = spreadSheet;
+            if (isMobileApp) {
+                // Rotation, iPad split view, the keyboard...
+                resizeObserverRef.current?.disconnect();
+                resizeObserverRef.current = new ResizeObserver(() => spreadSheet.resize());
+                resizeObserverRef.current.observe(container);
+            }
             setActiveSpreadsheet(spreadSheet);
             setLoading(false);
             spreadSheet.loadData(sheets);
@@ -438,6 +457,8 @@ function ExcelViewer() {
         return () => {
             spreadSheetRef.current = null;
             setActiveSpreadsheet(null);
+            resizeObserverRef.current?.disconnect();
+            resizeObserverRef.current = null;
             themeObserver.disconnect();
             clearTimeout(themeTimer);
         };
@@ -459,7 +480,7 @@ function ExcelViewer() {
                     </div>
                 </div>
             )}
-            {readOnly && !loading && !loadError && (
+            {readOnly && !isMobileApp && !loading && !loadError && (
                 <div className="excel-readonly-banner">
                     {t('viewer.readonlyBanner')}
                 </div>

@@ -169,9 +169,8 @@ export async function openApp(fake, { path = 'index.html', storage = {}, dark = 
     const context = await browser.createBrowserContext();
     const page = await context.newPage();
     await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-    if (dark) {
-        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }]);
-    }
+    // Always explicit: headless Chrome otherwise follows the Mac's appearance.
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }]);
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.exposeFunction('__anyfileCall', async (method, json) => {

@@ -62,24 +62,94 @@ function renderGlyph(
     height: number,
     labelSize = 14,
 ) {
-    const { font, fontScale, fontSize, fontBaseline } = fontInfo;
-    const scale = width / cellWidth;
+    const { font } = fontInfo;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, width, height);
     if (glyphIndex >= font.numGlyphs) return;
     const glyph = font.glyphs.glyphs[glyphIndex];
+    drawGlyph(fontInfo, ctx, glyph, limitLength(glyph.name, width > cellWidth ? 24 : 11), width, height,
+        `${labelSize}px Arial`, '#242424', '#333');
+}
+
+/** Draws the glyph centered in a width x height cell (100x84 is the list's cell) with its label below. */
+function drawGlyph(
+    fontInfo: FontInfo,
+    ctx: CanvasRenderingContext2D,
+    glyph: any,
+    label: string,
+    width: number,
+    height: number,
+    labelFont: string,
+    labelColor: string,
+    glyphColor: string,
+) {
+    const { fontScale, fontSize, fontBaseline } = fontInfo;
+    const scale = width / cellWidth;
     const glyphWidth = glyph.advanceWidth * fontScale * scale;
     const xCenter = (width - glyphWidth) / 2;
     const baseline = fontBaseline * scale;
     const scaledFontSize = fontSize * scale;
-    ctx.font = `${labelSize}px Arial`;
-    ctx.fillStyle = '#242424';
+    ctx.font = labelFont;
+    ctx.fillStyle = labelColor;
     ctx.textAlign = 'center';
-    ctx.fillText(limitLength(glyph.name, width > cellWidth ? 24 : 11), width / 2, height - 10 * scale);
+    ctx.fillText(label, width / 2, height - 10 * scale);
     ctx.fillStyle = '#FFFFFF';
     const path = glyph.getPath(xCenter, baseline - 10 * scale, scaledFontSize);
-    path.fill = '#333';
+    path.fill = glyphColor;
     path.draw(ctx);
+}
+
+export interface GlyphColors {
+    label: string;
+    glyph: string;
+}
+
+/** Shortens `text` with an ellipsis until it fits in `maxWidth` (in the context's current font). */
+function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let length = text.length;
+    while (length > 1 && ctx.measureText(text.slice(0, length) + '…').width > maxWidth) {
+        length--;
+    }
+    return text.slice(0, length) + '…';
+}
+
+/**
+ * The app (iPhone/iPad): draws a glyph sharply at the screen's pixel ratio in a cell of `width` x `height`
+ * CSS pixels, in the theme's colors. Call it again to redraw (e.g. after a theme change); `releaseCanvas`
+ * frees the canvas memory (iOS limits the total memory of all canvases).
+ */
+export function renderGlyphScaled(
+    fontInfo: FontInfo,
+    canvas: HTMLCanvasElement,
+    glyphIndex: string | number,
+    width: number,
+    height: number,
+    labelSize: number,
+    colors: GlyphColors,
+) {
+    const { font } = fontInfo;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    const index = Number(glyphIndex);
+    if (!(index < font.numGlyphs)) return;
+    const glyph = font.glyphs.get(index);
+    if (!glyph) return;
+    const labelFont = `${labelSize}px -apple-system, system-ui, sans-serif`;
+    ctx.font = labelFont;
+    // Glyphs without a name (e.g. in many CJK fonts) show their code point instead.
+    const label = glyph.name || (glyph.unicode !== undefined ? `U+${formatUnicode(glyph.unicode)}` : '');
+    drawGlyph(fontInfo, ctx, glyph, fitText(ctx, String(label), width - 8), width, height, labelFont, colors.label, colors.glyph);
+}
+
+export function releaseCanvas(canvas: HTMLCanvasElement) {
+    canvas.width = 0;
+    canvas.height = 0;
 }
 
 export function renderGlyphItem(fontInfo: FontInfo, canvas: HTMLCanvasElement, glyphIndex) {
