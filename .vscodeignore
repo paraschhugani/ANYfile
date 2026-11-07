@@ -26,3 +26,5 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 !package.nls*.json
 ANYfile VS Code Preview Icon.png
+
+mobile/**

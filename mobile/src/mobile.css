@@ -1,0 +1,199 @@
+/* ANYfile app: the shared PDF viewer on iPhone and iPad (loaded after viewer.css and viewer_adjust.css). */
+
+html,
+body.anyfile-app {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+body.anyfile-app {
+  background-color: var(--vscode-titleBar-activeBackground);
+  font-family: var(--vscode-font-family);
+}
+
+/* Keep the toolbar below the status bar / notch; pages may scroll under the home indicator. */
+body.anyfile-app #outerContainer {
+  position: absolute;
+  top: env(safe-area-inset-top);
+  right: env(safe-area-inset-right);
+  bottom: 0;
+  left: env(safe-area-inset-left);
+  width: auto;
+  height: auto;
+}
+
+body.anyfile-app #viewer {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Desktop-only controls */
+body.anyfile-app :is(#themeAdaptToggle, #openFile, #print, #download, #viewBookmark, #presentationMode,
+  #secondaryOpenFile, #secondaryPrint, #secondaryDownload, #secondaryViewBookmark, #secondaryPresentationMode,
+  #sidebarResizer) {
+  display: none !important;
+}
+
+/* Back to the library */
+#anyfileBack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--anyfile-accent);
+}
+
+#anyfileBack svg {
+  pointer-events: none;
+}
+
+/* PDF.js draws toolbar icons in ::before; this button has its own. */
+#anyfileBack::before {
+  display: none;
+}
+
+/* Phones (and narrow iPad windows): zoom by pinching; the zoom row would sit over the page. */
+@media (max-width: 900px) {
+  body.anyfile-app #toolbarViewerMiddle {
+    display: none;
+  }
+}
+
+/* Touch: a 44pt toolbar with 34pt buttons (PDF.js sizes everything for a mouse: 32/28px). */
+@media (pointer: coarse) {
+  body.anyfile-app {
+    --anyfile-toolbar-height: 44px;
+  }
+
+  body.anyfile-app :is(#toolbarContainer, #toolbarViewer, #toolbarSidebar) {
+    height: var(--anyfile-toolbar-height);
+  }
+
+  body.anyfile-app :is(#sidebarContainer, #viewerContainer, #sidebarContent, .findbar, .secondaryToolbar) {
+    top: var(--anyfile-toolbar-height);
+  }
+
+  body.anyfile-app :is(#toolbarViewerLeft, #toolbarViewerRight) {
+    padding-top: 5px;
+  }
+
+  body.anyfile-app #toolbarSidebar > * {
+    margin-top: 5px;
+  }
+
+  body.anyfile-app :is(#toolbarContainer, #toolbarSidebar) .toolbarButton {
+    width: 34px;
+    height: 34px;
+  }
+
+  body.anyfile-app :is(#toolbarContainer, #toolbarSidebar) .toolbarButton::before {
+    top: 9px;
+    left: 9px;
+  }
+
+  body.anyfile-app #toolbarContainer .toolbarField.pageNumber {
+    box-sizing: border-box;
+    height: 30px;
+    margin-top: 2px;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 15px;
+    line-height: 28px;
+  }
+
+  body.anyfile-app #numPages {
+    padding-top: 0;
+    font-size: 15px;
+    line-height: 34px;
+  }
+}
+
+/* Opening / saving */
+#anyfileSpinner {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-descriptionForeground);
+  font: 15px var(--vscode-font-family);
+}
+
+body.anyfile-loading #anyfileSpinner,
+body.anyfile-saving #anyfileSpinner {
+  display: flex;
+}
+
+body.anyfile-saving #anyfileSpinner {
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 70%, transparent);
+}
+
+body.anyfile-saving #anyfileSpinner p {
+  font-size: 0;
+}
+
+body.anyfile-saving #anyfileSpinner p::after {
+  content: 'Saving…';
+  font-size: 15px;
+}
+
+.anyfile-spinner-ring {
+  width: 28px;
+  height: 28px;
+  border: 3px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+  border-top-color: var(--anyfile-accent);
+  border-radius: 50%;
+  animation: anyfile-spin 0.9s linear infinite;
+}
+
+@keyframes anyfile-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#anyfileError {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: var(--vscode-editor-background);
+  font-family: var(--vscode-font-family);
+}
+
+#anyfileError[hidden] {
+  display: none;
+}
+
+.anyfile-error-box {
+  max-width: 340px;
+  text-align: center;
+  color: var(--vscode-foreground);
+}
+
+.anyfile-error-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+#anyfileErrorText {
+  margin: 0 0 20px;
+  font-size: 15px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.anyfile-error-box button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--anyfile-accent);
+  color: #ffffff;
+  font: 600 15px var(--vscode-font-family);
+}

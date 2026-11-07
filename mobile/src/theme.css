@@ -1,0 +1,83 @@
+/* ANYfile app: the VS Code theme variables the shared viewers use (PDF viewer and React viewers),
+   following the system appearance. */
+:root {
+  color-scheme: light dark;
+  --anyfile-accent: #007aff;
+  --vscode-font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --vscode-font-size: 13px;
+  --vscode-foreground: #1c1c1e;
+  --vscode-descriptionForeground: #6e6e73;
+  --vscode-icon-foreground: #1c1c1e;
+  --vscode-editor-background: #e5e5ea;
+  --vscode-titleBar-activeBackground: #f9f9fb;
+  --vscode-sideBar-background: #f2f2f7;
+  --vscode-sideBar-foreground: #1c1c1e;
+  --vscode-sideBar-border: rgba(60, 60, 67, 0.18);
+  --vscode-panel-border: rgba(60, 60, 67, 0.18);
+  --vscode-widget-border: rgba(60, 60, 67, 0.18);
+  --vscode-editorWidget-background: #ffffff;
+  --vscode-editorWidget-foreground: #1c1c1e;
+  --vscode-menu-background: #ffffff;
+  --vscode-menu-foreground: #1c1c1e;
+  --vscode-menu-border: rgba(60, 60, 67, 0.18);
+  --vscode-menu-selectionBackground: var(--anyfile-accent);
+  --vscode-menu-selectionForeground: #ffffff;
+  --vscode-menu-separatorBackground: rgba(60, 60, 67, 0.18);
+  --vscode-list-activeSelectionBackground: var(--anyfile-accent);
+  --vscode-list-activeSelectionForeground: #ffffff;
+  --vscode-list-hoverBackground: rgba(120, 120, 128, 0.12);
+  --vscode-list-hoverForeground: #1c1c1e;
+  --vscode-toolbar-hoverBackground: rgba(120, 120, 128, 0.16);
+  --vscode-focusBorder: var(--anyfile-accent);
+  --vscode-input-background: #ffffff;
+  --vscode-input-foreground: #1c1c1e;
+  --vscode-input-border: rgba(60, 60, 67, 0.29);
+  --vscode-inputValidation-errorBackground: #ffd7d5;
+  --vscode-dropdown-background: #ffffff;
+  --vscode-button-secondaryBackground: rgba(120, 120, 128, 0.16);
+  --vscode-button-secondaryHoverBackground: rgba(120, 120, 128, 0.24);
+  --vscode-notifications-background: #ffffff;
+  --vscode-notifications-foreground: #1c1c1e;
+  --vscode-notifications-border: rgba(60, 60, 67, 0.18);
+  --vscode-progressBar-background: var(--anyfile-accent);
+  --vscode-scrollbarSlider-background: rgba(0, 0, 0, 0.25);
+  --vscode-scrollbarSlider-hoverBackground: rgba(0, 0, 0, 0.35);
+  --vscode-sash-hoverBorder: var(--anyfile-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --anyfile-accent: #0a84ff;
+    --vscode-foreground: #f2f2f7;
+    --vscode-descriptionForeground: #98989f;
+    --vscode-icon-foreground: #f2f2f7;
+    --vscode-editor-background: #000000;
+    --vscode-titleBar-activeBackground: #1c1c1e;
+    --vscode-sideBar-background: #1c1c1e;
+    --vscode-sideBar-foreground: #f2f2f7;
+    --vscode-sideBar-border: rgba(84, 84, 88, 0.6);
+    --vscode-panel-border: rgba(84, 84, 88, 0.6);
+    --vscode-widget-border: rgba(84, 84, 88, 0.6);
+    --vscode-editorWidget-background: #2c2c2e;
+    --vscode-editorWidget-foreground: #f2f2f7;
+    --vscode-menu-background: #2c2c2e;
+    --vscode-menu-foreground: #f2f2f7;
+    --vscode-menu-border: rgba(84, 84, 88, 0.6);
+    --vscode-menu-separatorBackground: rgba(84, 84, 88, 0.6);
+    --vscode-list-hoverBackground: rgba(120, 120, 128, 0.24);
+    --vscode-list-hoverForeground: #f2f2f7;
+    --vscode-toolbar-hoverBackground: rgba(120, 120, 128, 0.32);
+    --vscode-input-background: #1c1c1e;
+    --vscode-input-foreground: #f2f2f7;
+    --vscode-input-border: rgba(84, 84, 88, 0.8);
+    --vscode-inputValidation-errorBackground: #5a1d1d;
+    --vscode-dropdown-background: #2c2c2e;
+    --vscode-button-secondaryBackground: rgba(120, 120, 128, 0.32);
+    --vscode-button-secondaryHoverBackground: rgba(120, 120, 128, 0.4);
+    --vscode-notifications-background: #2c2c2e;
+    --vscode-notifications-foreground: #f2f2f7;
+    --vscode-notifications-border: rgba(84, 84, 88, 0.6);
+    --vscode-scrollbarSlider-background: rgba(255, 255, 255, 0.25);
+    --vscode-scrollbarSlider-hoverBackground: rgba(255, 255, 255, 0.35);
+  }
+}

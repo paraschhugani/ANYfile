@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="color-scheme" content="light dark">
+  <title>ANYfile</title>
+  <link rel="stylesheet" href="app/library.css">
+  <script src="app/library.js" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <img src="app/logo.png" alt="" class="logo" width="32" height="32">
+    <h1>ANYfile</h1>
+    <button type="button" id="edit" class="text-button" hidden>Edit</button>
+  </header>
+  <main>
+    <button type="button" id="open" class="open-button">
+      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>
+      Open File
+    </button>
+    <p id="message" class="message" role="status" hidden></p>
+    <section id="recent" hidden>
+      <h2>Recent</h2>
+      <ul id="files" class="files"></ul>
+    </section>
+    <section id="empty" class="empty" hidden>
+      <p>Open a file from iCloud Drive or any folder in Files: PDF, Excel, CSV, Word, PowerPoint, EPUB, fonts, Parquet and images.</p>
+      <p>For PDFs, highlights and the page you're on are saved inside the file, so ANYfile in VS Code opens it at the same page.</p>
+    </section>
+  </main>
+</body>
+</html>

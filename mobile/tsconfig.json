@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+    "typeRoots": ["../node_modules/@types"]
+  },
+  "include": ["src/**/*.ts"]
+}

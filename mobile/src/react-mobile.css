@@ -1,0 +1,112 @@
+/* ANYfile app: the extension's React viewers on iPhone and iPad (loaded after theme.css). */
+
+html,
+body.anyfile-app {
+  height: 100%;
+  margin: 0;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+body.anyfile-app {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  --anyfile-bar-height: 44px;
+}
+
+/* The app's bar: back to the library and the file name. */
+#anyfileBar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: content-box;
+  height: var(--anyfile-bar-height);
+  padding: env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
+  background-color: var(--vscode-titleBar-activeBackground);
+  border-bottom: 0.5px solid var(--vscode-widget-border);
+}
+
+#anyfileBack {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 8px 0 2px;
+  border: none;
+  background: none;
+  color: var(--anyfile-accent);
+  font: 17px var(--vscode-font-family);
+}
+
+#anyfileBarTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--vscode-foreground);
+  font: 600 15px var(--vscode-font-family);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* Visually centered: balance the back button's width. */
+  margin-right: 72px;
+}
+
+/* The viewer fills the rest of the screen. */
+body.anyfile-app #root {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + var(--anyfile-bar-height));
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+#anyfileError {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: var(--vscode-editor-background);
+  font-family: var(--vscode-font-family);
+}
+
+#anyfileError[hidden] {
+  display: none;
+}
+
+.anyfile-error-box {
+  max-width: 340px;
+  text-align: center;
+  color: var(--vscode-foreground);
+}
+
+.anyfile-error-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+#anyfileErrorText {
+  margin: 0 0 20px;
+  font-size: 15px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.anyfile-error-box button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--anyfile-accent);
+  color: #ffffff;
+  font: 600 15px var(--vscode-font-family);
+}

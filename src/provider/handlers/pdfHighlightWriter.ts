@@ -55,6 +55,11 @@ export interface PdfViewStateOp {
     type: 'view';
     state: PdfViewState;
     fingerprint?: string | null;
+    /**
+     * Write only when the file holds no position saved at or after `state.t` (e.g. a position the app could
+     * not save before it was closed, written later: another device may have saved a newer one meanwhile).
+     */
+    onlyIfNewer?: boolean;
 }
 
 export type PdfHighlightOp = PdfHighlightAddOp | PdfHighlightRemoveOp | PdfViewStateOp;
@@ -303,7 +308,7 @@ export class PdfHighlightDocument {
                     return this.remove(op);
                 }
                 if (op?.type === 'view') {
-                    return this.setViewState(op.state);
+                    return this.setViewState(op.state, op.onlyIfNewer === true);
                 }
                 return { ok: false, changed: false, error: 'Unknown highlight operation.' };
             } catch (error) {
@@ -457,11 +462,38 @@ export class PdfHighlightDocument {
         return this.removeFound(found, true);
     }
 
-    private setViewState(state: PdfViewState | undefined): PdfHighlightOpResult {
+    /** The reading position stored in the file, or null when there is none (or it is not valid). */
+    getViewState(): PdfViewState | null {
+        const { lib, doc } = this;
+        const info = doc.context.lookup(doc.context.trailerInfo.Info);
+        if (!(info instanceof lib.PDFDict)) {
+            return null;
+        }
+        const raw = readName(lib, info.lookup(lib.PDFName.of(PDF_VIEW_STATE_KEY)));
+        try {
+            const value = raw === undefined ? null : JSON.parse(raw);
+            const page = value?.page;
+            if (!Number.isInteger(page) || page < 1 || page > doc.getPageCount()) {
+                return null;
+            }
+            const numberOrNull = (v: unknown) => typeof v === 'number' && Number.isFinite(v) ? v : null;
+            return { page, left: numberOrNull(value.left), top: numberOrNull(value.top), t: numberOrNull(value.t) };
+        } catch {
+            return null;
+        }
+    }
+
+    private setViewState(state: PdfViewState | undefined, onlyIfNewer = false): PdfHighlightOpResult {
         const { lib } = this;
         const page = state?.page;
-        if (typeof page !== 'number' || !Number.isInteger(page) || page < 1 || page > this.doc.getPageCount()) {
+        if (!state || typeof page !== 'number' || !Number.isInteger(page) || page < 1 || page > this.doc.getPageCount()) {
             return { ok: false, changed: false, error: 'Invalid page for the reading position.' };
+        }
+        if (onlyIfNewer) {
+            const storedTime = this.getViewState()?.t;
+            if (typeof state.t !== 'number' || (typeof storedTime === 'number' && storedTime >= state.t)) {
+                return { ok: true, changed: false };
+            }
         }
         const value: Record<string, number> = { v: 1, page };
         for (const key of ['left', 'top'] as const) {

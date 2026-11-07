@@ -14,6 +14,7 @@ Made by Paras Chhugani · X: [@paras_chhugani](https://x.com/paras_chhugani)
 > - **Remembers your page inside the PDF:** the last page you were on is saved in the file itself (as a custom document property), so it follows the PDF to your other devices with no limit on how many files are remembered. Turn it off with the `vscode-office.pdf.rememberPositionInFile` setting.
 > - **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
 > - **New name and icon.**
+> - **iPhone and iPad app:** the same viewers as an iOS app ([mobile/](mobile/README.md)). A PDF in iCloud Drive opens at the same page, with the same highlights, on the Mac and on the phone; Excel, CSV, Word, PowerPoint, EPUB, fonts, Parquet and images open view-only.
 >
 > To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.4.vsix`.
 

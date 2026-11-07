@@ -1,0 +1,10 @@
+{
+  "appId": "com.paraschhugani.anyfile",
+  "appName": "ANYfile",
+  "webDir": "www",
+  "backgroundColor": "#f5f5f7",
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": false
+  }
+}

@@ -246,6 +246,29 @@ test('W3. save time, PDF 2.0 version and an all-zero /ID are handled', async () 
     assert.deepEqual(ids, ['abcdefabcdefabcdefabcdefabcdefab', 'abcdefabcdefabcdefabcdefabcdefab'], 'zero /ID replaced once, then stable');
 });
 
+test('W4. onlyIfNewer writes a late position only when the file has nothing newer; getViewState reads it back', async () => {
+    const pdf = await threePages();
+    const apply = async (bytes, state, onlyIfNewer) => {
+        const document = await writer.PdfHighlightDocument.load(bytes);
+        const [result] = document.apply([{ type: 'view', state, onlyIfNewer }]);
+        return { result, bytes: result.changed ? await document.save() : bytes };
+    };
+    const none = await apply(pdf.bytes, { page: 2, t: 1000 }, true);
+    assert.equal(none.result.changed, true, 'no stored position: written');
+    const older = await apply(none.bytes, { page: 3, t: 999 }, true);
+    assert.equal(older.result.changed, false, 'older than the stored one: skipped');
+    const same = await apply(none.bytes, { page: 3, t: 1000 }, true);
+    assert.equal(same.result.changed, false, 'same time as the stored one: skipped');
+    const untimed = await apply(none.bytes, { page: 3 }, true);
+    assert.equal(untimed.result.changed, false, 'a late write without a time never overwrites');
+    const newer = await apply(none.bytes, { page: 3, t: 1001 }, true);
+    assert.equal(newer.result.changed, true, 'newer: written');
+    assert.deepEqual((await writer.PdfHighlightDocument.load(newer.bytes)).getViewState(), { page: 3, left: null, top: null, t: 1001 });
+    assert.equal((await writer.PdfHighlightDocument.load(pdf.bytes)).getViewState(), null, 'no position: null');
+    const forced = await apply(newer.bytes, { page: 1, t: 5 }, false);
+    assert.equal(forced.result.changed, true, 'a normal save (closing the viewer) always writes');
+});
+
 test('V6. same device after quitting without closing: local history wins over an older stored position', async () => {
     const pdf = await threePages();
     const { bytes } = await writeView(pdf.bytes, { page: 3, top: 792, t: 1000 });

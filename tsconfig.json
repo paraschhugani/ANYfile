@@ -21,6 +21,7 @@
 	},
 	"exclude": [
 		"src/react",
+		"mobile",
 		"node_modules",
 		".vscode-test"
 	]

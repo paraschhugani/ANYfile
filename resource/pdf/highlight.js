@@ -6,6 +6,8 @@
  * While highlight mode is on (the default), selecting text in a page immediately creates a
  * highlight. The webview only draws a temporary overlay; the extension writes a standard
  * /Highlight annotation into the PDF file (see src/provider/handlers/pdfHighlight*.ts).
+ * On touch screens (the ANYfile app) text is selected with a long press and handles, which the page
+ * cannot see end: a "Highlight" button next to the selection creates the highlight instead.
  *
  * Messages (vscodeEvent):
  *   -> pdfHighlightAdd    { id, pageIndex, quadPoints, rect, color, text, fingerprint }
@@ -109,6 +111,11 @@
     fileHighlights: new Map(),
     pendingRefRemovals: new Set(),
     pointer: null,
+    // 'touch' after a touch: selections are then highlighted with the selection button.
+    lastPointerType: 'mouse',
+    selectionButton: null,
+    selectionRange: null,
+    selectionTimer: null,
     popup: null,
     toast: null,
     toastTimer: null,
@@ -403,14 +410,16 @@
     };
   }
 
-  function createHighlightsFromSelection() {
+  function createHighlightsFromSelection(givenRange) {
     const viewerElement = document.getElementById('viewer');
     const selection = document.getSelection();
-    if (!viewerElement || !selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    const range = givenRange
+      || (selection && selection.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : null);
+    if (!viewerElement || !range || range.collapsed) {
       return false;
     }
     syncDocument();
-    const pages = collectSelection(selection.getRangeAt(0), viewerElement);
+    const pages = collectSelection(range, viewerElement);
     if (!pages.size) {
       return false;
     }
@@ -698,6 +707,91 @@
     state.popup = popup;
   }
 
+  /* -------------------------------------------------------- touch selection */
+
+  function selectionInViewer() {
+    const viewerElement = document.getElementById('viewer');
+    const selection = document.getSelection();
+    if (!viewerElement || !selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      return null;
+    }
+    const range = selection.getRangeAt(0);
+    return viewerElement.contains(range.commonAncestorContainer) ? range : null;
+  }
+
+  function hideSelectionButton() {
+    state.selectionRange = null;
+    if (state.selectionButton) {
+      state.selectionButton.hidden = true;
+    }
+  }
+
+  function ensureSelectionButton() {
+    if (state.selectionButton) {
+      return state.selectionButton;
+    }
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'office-hl-select-button';
+    button.hidden = true;
+    // A touch on the button must not clear the selection (iOS clears it on a tap elsewhere).
+    button.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+    button.addEventListener('touchend', (event) => {
+      event.preventDefault();
+      highlightFromSelectionButton();
+    });
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      highlightFromSelectionButton();
+    });
+    document.body.appendChild(button);
+    state.selectionButton = button;
+    return button;
+  }
+
+  function highlightFromSelectionButton() {
+    const range = state.selectionRange;
+    hideSelectionButton();
+    if (!range) {
+      return;
+    }
+    closePopup();
+    createHighlightsFromSelection(range);
+    document.getSelection()?.removeAllRanges();
+  }
+
+  function scheduleSelectionButton() {
+    clearTimeout(state.selectionTimer);
+    state.selectionTimer = setTimeout(updateSelectionButton, 150);
+  }
+
+  function updateSelectionButton() {
+    const range = state.lastPointerType === 'touch' && isModeOn() && !isHandToolActive() ? selectionInViewer() : null;
+    const rects = range ? [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0) : [];
+    if (!rects.length) {
+      hideSelectionButton();
+      return;
+    }
+    const button = ensureSelectionButton();
+    button.innerHTML = `${highlighterIcon(currentColor().hex)}<span>Highlight</span>`;
+    button.hidden = false;
+    state.selectionRange = range.cloneRange();
+    // Below the end of the selection (the system's own menu shows above it), else above its start.
+    const margin = 8;
+    const gap = 14;
+    const { width, height } = button.getBoundingClientRect();
+    const last = rects[rects.length - 1];
+    const first = rects[0];
+    let top = last.bottom + gap;
+    if (top + height > window.innerHeight - margin) {
+      top = first.top - height - gap;
+    }
+    let left = last.left + last.width / 2 - width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+    button.style.left = `${Math.round(left)}px`;
+    button.style.top = `${Math.round(Math.max(margin, Math.min(top, window.innerHeight - height - margin)))}px`;
+  }
+
   /* ------------------------------------------------------------------- toast */
 
   function showToast(message) {
@@ -760,6 +854,9 @@
     }
     if (!state.writable) {
       closeColorMenu();
+    }
+    if (state.selectionButton) {
+      scheduleSelectionButton();
     }
   }
 
@@ -861,6 +958,7 @@
   }
 
   function onPointerDown(event) {
+    state.lastPointerType = event.pointerType || 'mouse';
     if (state.popup && !state.popup.contains(event.target)) {
       closePopup();
     }
@@ -873,6 +971,7 @@
       x: event.clientX,
       y: event.clientY,
       target: event.target,
+      pointerType: event.pointerType || 'mouse',
       selection: rangeSnapshot(document.getSelection()),
     };
   }
@@ -901,7 +1000,8 @@
     const snapshot = rangeSnapshot(selection);
     if (snapshot) {
       // Ignore gestures that did not change the selection (e.g. a click on the scrollbar).
-      if (isModeOn() && !sameSnapshot(snapshot, pointer.selection)) {
+      // Touch selections are highlighted with the selection button (their handles can still move).
+      if (isModeOn() && pointer.pointerType !== 'touch' && !sameSnapshot(snapshot, pointer.selection)) {
         closePopup();
         createHighlightsFromSelection();
       }
@@ -999,11 +1099,14 @@
     window.addEventListener('pointerdown', onPointerDown, true);
     window.addEventListener('pointerup', onPointerUp, true);
     window.addEventListener('keydown', onKeyDown);
+    document.addEventListener('selectionchange', scheduleSelectionButton);
     const container = document.getElementById('viewerContainer');
     if (container) {
       container.addEventListener('scroll', closePopup, { passive: true });
+      container.addEventListener('scroll', scheduleSelectionButton, { passive: true });
     }
     window.addEventListener('resize', closePopup);
+    window.addEventListener('resize', scheduleSelectionButton);
     PDFViewerApplication.initializedPromise.then(() => {
       const eventBus = PDFViewerApplication.eventBus;
       eventBus.on('pagesinit', syncDocument);

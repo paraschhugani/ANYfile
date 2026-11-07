@@ -1,0 +1,25 @@
+{
+  "name": "anyfile-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ANYfile for iPhone and iPad: the ANYfile PDF viewer (PDF.js, highlights, reading position) in a Capacitor app",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "sync": "node build.mjs && cap sync ios",
+    "ios": "node build.mjs && cap run ios",
+    "open": "cap open ios",
+    "test": "node build.mjs && node --test test/app.test.mjs test/formats.test.mjs",
+    "typecheck": "../node_modules/.bin/tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3",
+    "pdf-lib": "1.17.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "esbuild": "0.28.2",
+    "pptxgenjs": "4.0.1"
+  }
+}
