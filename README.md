@@ -6,19 +6,58 @@
 
 Made by Paras Chhugani · X: [@paras_chhugani](https://x.com/paras_chhugani)
 
-> **I modified this extension to fit my use case.** Thank you to [cweijan/vscode-office](https://github.com/cweijan/vscode-office) (Office Viewer by Weijan Chen, MIT License). This extension is built on their work.
->
-> What I changed:
->
-> - **PDF highlighting:** select text in a PDF to highlight it. Highlighting is on by default, and the toolbar has a toggle and five colors. Highlights are saved into the PDF file as standard annotations, so other PDF readers show them too. Click a highlight to remove it, or press Ctrl/Cmd+Z to undo the last one.
-> - **Remembers your page inside the PDF:** the last page you were on is saved in the file itself (as a custom document property), so it follows the PDF to your other devices with no limit on how many files are remembered. Turn it off with the `vscode-office.pdf.rememberPositionInFile` setting.
-> - **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
-> - **New name and icon.**
-> - **iPhone and iPad app:** the same viewers as an iOS app ([mobile/](mobile/README.md)). A PDF in iCloud Drive opens at the same page, with the same highlights, on the Mac and on the phone; Excel, CSV, Word, PowerPoint, EPUB, fonts, Parquet and images open view-only.
->
-> To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.4.vsix`.
+ANYfile opens PDFs, spreadsheets, Word documents, slides, e-books and more: in **VS Code** on the Mac, and in an **iPhone and iPad app**. Keep your files in iCloud Drive and a PDF opens at the same page, with the same highlights, on every device.
 
-The rest of this README describes the original Office Viewer features, which all still work.
+> **I modified this extension to fit my use case.** Thank you to [cweijan/vscode-office](https://github.com/cweijan/vscode-office) (Office Viewer by Weijan Chen, MIT License). ANYfile is built on their work.
+
+## VS Code extension
+
+What I changed:
+
+- **PDF highlighting:** select text in a PDF to highlight it. Highlighting is on by default, and the toolbar has a toggle and five colors. Highlights are saved into the PDF file as standard annotations, so other PDF readers show them too. Click a highlight to remove it, or press Ctrl/Cmd+Z to undo the last one.
+- **Remembers your page inside the PDF:** the last page you were on is saved in the file itself (as a custom document property), so it follows the PDF to your other devices with no limit on how many files are remembered. Turn it off with the `vscode-office.pdf.rememberPositionInFile` setting.
+- **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
+- **New name and icon.**
+
+To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.4.vsix`.
+
+## iPhone and iPad app
+
+<p align="center">
+  <img src="image/ios/pdf.png" alt="A PDF with a highlight on iPhone" width="240">
+  <img src="image/ios/powerpoint.png" alt="A PowerPoint deck on iPhone" width="240">
+  <img src="image/ios/excel.png" alt="A spreadsheet on iPhone" width="240">
+</p>
+
+The same viewers as the extension, as an iOS app in [`mobile/`](mobile/README.md). Open files from iCloud Drive or any folder in the Files app; they are opened in place, so iCloud keeps every device in sync.
+
+| Files | In the app |
+|---|---|
+| PDF | Read, highlight (long-press text, then tap **Highlight**), pinch to zoom. The page you're on and your highlights are saved inside the PDF, so VS Code and the app open it at the same place. |
+| Excel, CSV | View, with sheet tabs and Find |
+| Word | View; the page fits the screen, pinch to zoom |
+| PowerPoint | View; swipe between slides, thumbnails in a drawer |
+| EPUB | Read; swipe or tap the sides to turn pages |
+| Fonts, Parquet | View |
+| Images, HEIC | Shown by iOS's own Quick Look |
+
+Everything except PDFs is view-only for now. The app follows the system's light and dark mode.
+
+**How it's built:** the viewers are the extension's own code (PDF.js with the highlighting and page memory, and the React viewers), running in a [Capacitor](https://capacitorjs.com) app. One small Swift file opens and saves files with iCloud-safe file coordination; if another device changed a PDF in the meantime, the app re-reads it and applies its change again instead of overwriting.
+
+**Run it** (needs a Mac with Xcode and Node.js):
+
+```bash
+cd mobile
+npm install
+npm run ios      # builds it and runs it in an iOS simulator
+```
+
+To install it on your own iPhone or iPad, see [mobile/README.md](mobile/README.md).
+
+## Office Viewer features
+
+The rest of this README describes the original Office Viewer features, which all still work in the extension.
 
 ## Introduction
 
@@ -90,8 +129,8 @@ Shortcuts: Based on [shortcut.md](shortcut.md), plus:
 ### Getting started
 
 ```bash
-git clone https://github.com/cweijan/vscode-office.git
-cd vscode-office
+git clone https://github.com/paraschhugani/ANYfile.git
+cd ANYfile
 npm install
 ```
 

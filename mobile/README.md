@@ -30,7 +30,7 @@ npm run open      #     then open Xcode
 
 In Xcode, pick a simulator or your iPhone and press Run.
 
-### On your iPhone
+### On your iPhone or iPad
 
 1. Xcode → Settings → Accounts: add your Apple ID.
 2. Select the **App** target → Signing & Capabilities → Team: pick your team (a free Apple ID shows as
