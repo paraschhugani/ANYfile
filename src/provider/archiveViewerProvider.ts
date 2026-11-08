@@ -7,7 +7,6 @@ import { handleZip } from '@/provider/compress/zipHandler';
 import { handleRar } from '@/provider/compress/rarHandler';
 import { handleTarGz } from '@/provider/compress/tarHandler';
 import { handleSevenZip } from '@/provider/compress/sevenZipHandler';
-import { TelemetryService } from '@/service/telemetryService';
 import * as vscode from 'vscode';
 
 /**
@@ -64,8 +63,6 @@ export class ArchiveViewerProvider implements vscode.CustomReadonlyEditorProvide
 				return;
 		}
 
-		const fileType = suffix.startsWith('.') ? suffix.slice(1) : suffix;
-		TelemetryService.get()?.trackOfficeViewOpen(uri.fsPath, 'zip', fileType);
 		void ReactApp.view(webview, { route: 'zip' });
 	}
 }

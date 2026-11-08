@@ -3,8 +3,6 @@ import { Uri, ViewColumn, window, type ExtensionContext } from "vscode";
 import { Util } from "../common/util";
 import { extensionResource, getExtensionResourceRoots } from "../common/extensionResource";
 import { readUriText } from "../common/workspaceFs";
-import { fileTypeFromPath } from "@/service/officeViewType";
-import { TelemetryService } from "@/service/telemetryService";
 import { i18n } from "@/common/global";
 
 export class HtmlService {
@@ -18,7 +16,6 @@ export class HtmlService {
             }
             uri = activeEditor.document.uri;
         }
-        TelemetryService.get()?.trackViewOpen('previewHtml', fileTypeFromPath(uri.fsPath));
         const folderUri = Uri.joinPath(uri, '..');
         const webviewPanel = window.createWebviewPanel(
             "office-viewer.viewHtml", basename(uri.fsPath),

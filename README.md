@@ -17,9 +17,10 @@ What I changed:
 - **PDF highlighting:** select text in a PDF to highlight it. Highlighting is on by default, and the toolbar has a toggle and five colors. Highlights are saved into the PDF file as standard annotations, so other PDF readers show them too. Click a highlight to remove it, or press Ctrl/Cmd+Z to undo the last one.
 - **Remembers your page inside the PDF:** the last page you were on is saved in the file itself (as a custom document property), so it follows the PDF to your other devices with no limit on how many files are remembered. Turn it off with the `vscode-office.pdf.rememberPositionInFile` setting.
 - **Local-only:** it runs as its own extension (`paras-chhugani.anyfile`), installed from a `.vsix`, so the Marketplace never updates or replaces it.
+- **No usage data:** the original extension sent anonymous usage data to its author's Azure account. I removed that code, so ANYfile sends nothing (see [Privacy](#privacy)).
 - **New name and icon.**
 
-To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.6.vsix`.
+To install: `npx @vscode/vsce package --no-dependencies`, then `code --install-extension anyfile-4.2.7.vsix`.
 
 ## iPhone and iPad app
 
@@ -159,30 +160,11 @@ npm run build    # production build
 npm run package  # create .vsix
 ```
 
-## Usage data
+## Privacy
 
-Office Viewer collects **anonymous usage data** to understand which preview features are used, so we can improve the extension. Data is sent to [Azure Application Insights](https://learn.microsoft.com/azure/azure-monitor/app/app-insights-overview) via the official [`@vscode/extension-telemetry`](https://www.npmjs.com/package/@vscode/extension-telemetry) module.
+ANYfile doesn't collect usage data. Neither the VS Code extension nor the iPhone and iPad app has analytics or telemetry, and your files never leave your devices (apart from iCloud Drive syncing them, if you keep them there).
 
-### What we collect
-
-| Event         | When                              | Properties                                                                                                 |
-| ------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `view.open` | A custom preview/editor is opened | `viewType` (e.g. `excel`, `markdown`, `pdf`), `fileType` (extension only, e.g. `xlsx`, `md`) |
-
-We **do not** collect file paths, file names, URLs, repository names, request contents, or other personally identifiable information.
-
-### How to opt out
-
-Telemetry is sent only when **both** of the following allow it:
-
-1. VS Code global telemetry is enabled (`telemetry.telemetryLevel` is not `off`, or `telemetry.enableTelemetry` is `true` on older versions).
-2. Extension telemetry is enabled: set `vscode-office.enableTelemetry` to `false` in Settings.
-
-You can also disable all VS Code telemetry in **Settings → Application → Telemetry**.
-
-### Maintainer setup
-
-If you build and publish this extension yourself, see [docs/telemetry.md](docs/telemetry.md) for Azure Application Insights setup and sample queries.
+A few things go online only because you asked for them: HTTP requests you send from `.http` files, the Markdown editor's AI features (using the model you set up), and images in a Markdown file that point to the web.
 
 ## Credits
 

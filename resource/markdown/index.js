@@ -100,9 +100,6 @@ handler.on("open", async (md) => {
         };
       }
     },
-    onTelemetry(event, properties) {
-      handler.emit('telemetry', { event, properties });
-    },
     ai: {
       onPolish(markdown, apply, options) {
         handler.emit('aiPolish', { markdown, options })

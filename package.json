@@ -2,7 +2,7 @@
 	"name": "anyfile",
 	"displayName": "ANYfile",
 	"description": "View word, excel, powerpoint files and using WYSIWYG editor for markdown.",
-	"version": "4.2.6",
+	"version": "4.2.7",
 	"publisher": "paras-chhugani",
 	"author": {
 		"name": "Paras Chhugani",
@@ -810,21 +810,6 @@
 						"description": "Enable custom variable references CodeLens in request file"
 					}
 				}
-			},
-			{
-				"title": "Telemetry",
-				"order": 99,
-				"properties": {
-					"vscode-office.enableTelemetry": {
-						"type": "boolean",
-						"default": true,
-						"tags": [
-							"telemetry",
-							"usesOnlineServices"
-						],
-						"markdownDescription": "Enable anonymous usage data collection to help improve Office Viewer. This respects VS Code global telemetry settings (`#telemetry.telemetryLevel#`)."
-					}
-				}
 			}
 		]
 	},
@@ -875,7 +860,6 @@
 		"@lezer/highlight": "^1.2.3",
 		"@mind-elixir/import-xmind": "^1.0.8",
 		"@vscode/codicons": "^0.0.45",
-		"@vscode/extension-telemetry": "^1.5.2",
 		"@zip.js/zip.js": "^2.8.26",
 		"7z-wasm": "^1.2.0",
 		"ag-psd": "^30.1.1",

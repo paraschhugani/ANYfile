@@ -13,7 +13,6 @@ import { WebUnsupportedViewerProvider } from './provider/webUnsupportedViewerPro
 import { HtmlService } from './service/htmlService';
 import { MarkdownService } from './service/markdownService';
 import { switchCsvEditor } from './service/csvService';
-import { TelemetryService } from './service/telemetryService';
 import { activateXml } from './provider/xml';
 import { activateYaml } from './provider/yaml';
 import { IconService } from './service/icon/iconService';
@@ -21,7 +20,6 @@ import { IconService } from './service/icon/iconService';
 export async function activate(context: vscode.ExtensionContext) {
 	setExtensionHostContext();
 	await Global.init(context);
-	TelemetryService.init(context);
 	await IconService.getInstance().init(context);
 	FileUtil.init(context);
 	ReactApp.init(context);

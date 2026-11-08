@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { Global } from './common/global';
-import { TelemetryService } from './service/telemetryService';
 import { JavaDecompilerProvider } from './provider/javaDecompilerProvider';
 import { MarkdownEditorProvider } from './provider/markdownEditorProvider';
 import { OfficeViewerProvider } from './provider/officeViewerProvider';
@@ -19,7 +18,6 @@ import { IconService } from './service/icon/iconService';
 
 export async function activate(context: vscode.ExtensionContext) {
 	await Global.init(context);
-	TelemetryService.init(context);
 	await IconService.getInstance().init(context);
 	activateHttp(context);
 	activateYaml(context);

@@ -15,7 +15,6 @@ import {
 } from '../util/resolveGitHistoryCommandContext';
 import { normalizeRepoPath } from '../util/repoPath';
 import { i18n } from '@/common/global';
-import { TelemetryService } from '@/service/telemetryService';
 
 let commitService: CommitService | undefined;
 let repoDiscovery: RepoDiscovery | undefined;
@@ -104,7 +103,6 @@ async function openGitHistory(
         gitActionHandler,
         panelContext,
     );
-    TelemetryService.get()?.trackViewOpen('gitHistory');
 }
 
 async function runQuickSyncCommand(): Promise<void> {

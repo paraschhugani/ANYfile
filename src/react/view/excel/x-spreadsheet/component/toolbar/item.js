@@ -29,7 +29,6 @@ export default class Item {
       .attr('data-tooltip', tip);
     return btn;
   }
-  trackTelemetry() {}
 
   setState() {}
 }

@@ -23,7 +23,6 @@ import { Toolbar } from "./ts/toolbar/index";
 import { disableToolbar, hidePanel } from "./ts/toolbar/setToolbar";
 import { enableToolbar } from "./ts/toolbar/setToolbar";
 import { AIDialog } from "./ts/ui/aiDialog";
-import { telemetry } from "./ts/util/telemetry";
 import { AIReviewPanel } from "./ts/ui/aiReviewPanel";
 import { initUI } from "./ts/ui/initUI";
 import { setCodeTheme } from "./ts/ui/setCodeTheme";
@@ -513,10 +512,6 @@ class Vditor {
                 onStop: () => finishReview(true),
             },
         );
-        telemetry(this.vditor, "markdown.ai.polish", {
-            engine: options?.engine ?? "vscode",
-            isSelection: !replaceAll,
-        });
         onPolish(markdown, (_result: string) => { /* streaming via streamAIChunk/endAIStream */ }, options);
     }
 

@@ -8,7 +8,6 @@ import { handleSvg } from './handlers/svgHandler';
 import { isVirtualUri, readUriText } from './handlers/officeContent';
 import { handleCommonEvent } from './compress/commonHandler';
 import { handlePdfHighlight } from './handlers/pdfHighlightHandler';
-import { TelemetryService } from '@/service/telemetryService';
 import { extensionResource, getExtensionResourceRoots, readExtensionText } from '@/common/extensionResource';
 
 /**
@@ -107,8 +106,6 @@ export class OfficeViewerProvider implements vscode.CustomReadonlyEditorProvider
 				if (route) break;
 				vscode.commands.executeCommand('vscode.openWith', uri, 'default');
 		}
-		const fileType = suffix.startsWith('.') ? suffix.slice(1) : suffix;
-		TelemetryService.get()?.trackOfficeViewOpen(uri.fsPath, route, fileType);
 		if (route) return ReactApp.view(webview, { route });
 	}
 

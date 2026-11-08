@@ -85,7 +85,6 @@ export const setEditorTheme = (
     vditor: IVditor,
     theme: string,
     notify = true,
-    telemetryKind: "editor" | "toggle" = "editor",
 ) => {
     const resolved = resolveEditorTheme(theme);
     if (!EDITOR_THEME_IDS.includes(resolved)) {
